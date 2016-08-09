@@ -35,7 +35,7 @@
 		.arrow-up {
 			display: inline-block;
 			margin-top: 0.3em;
-			margin-left: 0.5em;
+			margin-left: 0.8em;
 			width: 0; 
 			height: 0; 
 			border-left: 0.4em solid transparent;
@@ -45,12 +45,20 @@
 		.arrow-down {
 			display: inline-block;
 			margin-top: 0.3em;
-			margin-left: 0.5em;
+			margin-left: 0.8em;
 			width: 0; 
 			height: 0; 
 			border-left: 0.4em solid transparent;
 			border-right: 0.4em solid transparent;
 			border-top: calc((0.4em + 0.4em) * 0.866) solid red;
+		}
+		.flat {
+			display: inline-block;
+			margin-top: 0.3em;
+			margin-left: 0.8em;
+			width: 0.63em; 
+			height: 0.1em; 
+			border-top: 0.3em solid #B3B3B3;
 		}
 	</style>
 
@@ -67,10 +75,12 @@
 			render: function() {
 				return (
 					<tr>
+						<td className="date">{ this.props.kickOffAt }</td>
 						<td className="team-a">{ this.props.teamA.name }</td>
 						<td className="score"><span>{ this.props.teamA.score }</span> - <span>{ this.props.teamB.score }</span></td>
 						<td className="team-b">{ this.props.teamB.name }</td>
 						<td className="report">{ this.props.fullTime }</td>
+						<td><button>Delete</button></td>
 					</tr>
 				)
 			}
@@ -82,12 +92,14 @@
 				return (
 					<table className="results">
 						<tbody>
+							<button>Add</button>
 							{ this.props.results.map(function(result) {
 								return (
 									<ResultsTableRow
 										key={ i++ }
 										teamA={{ name: result.teamA, score: result.teamA_Goals }}
 										teamB={{ name: result.teamB, score: result.teamB_Goals }}
+										kickOffAt={ result.kickOffAt }
 										fullTime={ result.fullTime ? "Full time" : "Still to play" }
 									/>
 								);
@@ -123,7 +135,6 @@
 						{ this.props.teamsStats.map(function(teamStats) {
 							return <LeagueTableRow
 								key={ i++ }
-								position={ i }
 								teamStats={ teamStats }
 							/>
 						}) }
@@ -134,9 +145,17 @@
 
 		var LeagueTableRow = React.createClass({
 			render: function() {
+				var arrowClassMap = {
+					up: "arrow-up",
+					down: "arrow-down",
+					stay: "flat"
+				};
 				return <tr>
 					<td></td>
-					<td className="centered position"><div className="arrow-up" /></td>
+					<td className="centered position">
+						{ this.props.teamStats.position }
+						<div className={ arrowClassMap[this.props.teamStats.moved] } />
+					</td>
 					<td className="team">{ this.props.teamStats.name }</td>
 					<td className="centered played">{ this.props.teamStats.played }</td>
 					<td className="centered won">{ this.props.teamStats.won }</td>
@@ -168,7 +187,7 @@
 			});
 
 			$.ajax({
-				url: "/matches",
+				url: "/match",
 				success: function(data) {
 					var results = JSON.parse(data);
 					ReactDOM.render(

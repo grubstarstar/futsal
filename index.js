@@ -1,5 +1,6 @@
 var _ = require('underscore');
 var express = require('express');
+var bodyParser = require('body-parser');
 var MongoClient = require('mongodb').MongoClient, assert = require('assert');
  
 var url = 'mongodb://localhost:27017/futsal';
@@ -9,7 +10,7 @@ var db;
 var app = express();
 app.use(express.static('public'));
 app.use(express.static('bower_components'));
-
+app.use(bodyParser.json());
 
 
 app.get('/table', function(req, res, next) {
@@ -117,6 +118,7 @@ app.get('/table', function(req, res, next) {
 				});
 			});
 
+			// worjk out the rank of the teams now and before the last game
 			var teamRankAtGameBeforeLast = {};
 			var position = 1;
 
@@ -149,6 +151,7 @@ app.get('/table', function(req, res, next) {
 			teams.forEach(function(team) {
 
 				teamStats[team.name].name = team.name;
+				teamStats[team.name].position = teamRank[team.name];
 				
 				// add a property showing whether the team has moved up, down or stayed at the smae position since the last game.
 				if(teamRank[team.name] < teamRankAtGameBeforeLast[team.name]) {
@@ -176,7 +179,7 @@ app.get('/table', function(req, res, next) {
 
 });
 
-app.get('/matches', function(req, res, next) {
+app.get('/match', function(req, res, next) {
 	
 	var match = db.collection('match');
 
@@ -218,6 +221,70 @@ app.get('/matches', function(req, res, next) {
 		});
 
 	});
+
+});
+
+app.post('/match', function(req, res, next) {
+
+	var data = _(req.body).pick('teamA', 'teamB', 'teamA_Goals', 'teamB_Goals', 'kickOffAt', 'fullTime');
+	data.kickOffAt = new Date(data.kickOffAt);
+	
+	teamsFound = {
+		teamA: null,
+		teamB: null
+	};
+
+	function onGotTeam(AorB, insertedId) {
+		teamsFound[AorB] = true;
+		data[AorB] = insertedId;
+		console.log(teamsFound);
+		if(teamsFound.teamA && teamsFound.teamB) {
+			db.collection('match').insert(data, function(err, result) {
+				console.log('hither');
+				if (err) throw err;
+				res.end(JSON.stringify(result, null, "   "));
+				next();
+			});	
+		}
+	}
+
+	db.collection('team').findOne(
+		{ name: data.teamA },
+		function(err, doc) {
+			if (err) throw err;
+			if(doc) {
+				onGotTeam('teamA', doc._id);
+			} else {
+				db.collection('team').insert(
+					{ name: data.teamA },
+					function(err, doc) {
+						onGotTeam('teamA', doc._id);
+					}
+				);
+			}
+		}
+	);
+
+	db.collection('team').findOne(
+		{ name: data.teamB },
+		function(err, doc) {
+			if (err) throw err;
+			if(doc) {
+				onGotTeam('teamB', doc._id);
+			} else {
+				db.collection('team').insert(
+					{ name: data.teamB },
+					function(err, doc) {
+						onGotTeam('teamB', doc._id);
+					}
+				);
+			}
+		}
+	);
+
+});
+
+app.delete('/match', function(req, res, next) {
 
 });
 

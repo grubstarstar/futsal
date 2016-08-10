@@ -237,10 +237,8 @@ app.post('/match', function(req, res, next) {
 	function onGotTeam(AorB, insertedId) {
 		teamsFound[AorB] = true;
 		data[AorB] = insertedId;
-		console.log(teamsFound);
 		if(teamsFound.teamA && teamsFound.teamB) {
 			db.collection('match').insert(data, function(err, result) {
-				console.log('hither');
 				if (err) throw err;
 				res.end(JSON.stringify(result, null, "   "));
 				next();

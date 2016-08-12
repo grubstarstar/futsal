@@ -7,30 +7,60 @@
 		body {
 			font-family: Verdana, "sans-serif";
 		}
-		table.league-table, table.results {
+		div.league-table table, div.results table, div.fixtures table {
 			border-collapse: collapse;
 			background: #E6E6E6;
-			font-size: 0.7em;
 		}
-		table.league-table td, table.league-table th, table.results td {
+		div.league-table, div.results, div.fixtures {
+			font-size: 0.8em;
+		}
+		div.league-table div.global-actions, div.results div.global-actions, div.fixtures div.global-actions {
+			margin-bottom: 1em;
+		}
+		div.league-table table td, div.league-table table th, div.results table td, div.fixtures table td {
 			border: solid white 0.2em;
 			padding: 0.6em 1em;
 		}
-		table.league-table th {
+		div.league-table table th {
 			background: #191919;
 			color: #FFFFFF;
 			font-weight: normal;
 		}
-		table.league-table td.centered {
+		div.league-table table td.centered {
 			text-align: center;
 		}
 
-		table.results td[class^=team-] {
+		div.results table td[class^=team-], div.fixtures table td[class^=team-] {
 			width: 10em;
 		}
-		table.results td.team-a {
+		div.results table td.team-a, div.fixtures table td.team-a {
 			text-align: right;
 		}
+		div.fixtures table th.day-header {
+			background: #808080;
+			color: #FFFFFF;
+			padding: 0.6em 1em;
+			font-weight: normal;
+		}
+		/* keep the vert padding slim on cells that contain buttons */
+		div.fixtures table td.control-cell, div.league-table table td.control-cell {
+			padding: 0.4em 0.3em;
+		}
+
+		button.btn-sm {
+			padding: 0.15em 0.4em;
+		}
+		/*div.fixtures button {
+			background: #4C4C4C;
+			color: white;
+			border: none;
+			border-radius: 0.2em;
+			transition: background 0.2s;
+		}
+		div.fixtures button:hover {
+			background: #666666;
+			color: white;
+		}*/
 
 		.arrow-up {
 			display: inline-block;
@@ -62,25 +92,54 @@
 		}
 	</style>
 
+	<!-- <script type="text/javascript" src="jquery/dist/jquery.js"></script> -->
+	<!-- looks like we need this version for bootstrap datetimepicker... -->
+	<script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
+
+	<script type="text/javascript" src="moment/min/moment.min.js"></script>
+
+	<script type="text/javascript" src="bootstrap/dist/js/bootstrap.min.js"></script>
+
+	<script type="text/javascript" src="eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
+
+
+	<!-- JQuery Datepicker -->
+	<!-- <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script> -->
+	<!-- <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css"> -->
+
+	<!-- React -->
 	<script src="https://npmcdn.com/react@15.3.0/dist/react.js"></script>
 	<script src="https://npmcdn.com/react-dom@15.3.0/dist/react-dom.js"></script>
 	<script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
-	<script src="jquery/dist/jquery.js" type="text/javascript"></script>
+
+	<!-- Underscore -->
+	<script src="underscore/underscore.js" type="text/javascript"></script>
+
+	<!-- Semantic UI -->
+	<!-- <link rel="stylesheet" type="text/css" href="dist/semantic.min.css"> -->
+	<!-- <script src="dist/semantic.min.js"></script> -->
 
 	<!-- <script src="scripts/react/results-table.jsx" type="text/babel"></script> -->
 
+	<!-- Bootstrap CSS -->
+	<link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css" />
+
+	<!-- Font Awesome icons for spinners and the like -->
+	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+	
 	<script type="text/babel">
 
 		var ResultsTableRow = React.createClass({
 			render: function() {
 				return (
 					<tr>
-						<td className="date">{ this.props.kickOffAt }</td>
+						<td className="date">{ moment(this.props.kickOffAt).format('dddd Do MMMM, h:mm a') }</td>
 						<td className="team-a">{ this.props.teamA.name }</td>
 						<td className="score"><span>{ this.props.teamA.score }</span> - <span>{ this.props.teamB.score }</span></td>
 						<td className="team-b">{ this.props.teamB.name }</td>
 						<td className="report">{ this.props.fullTime }</td>
-						<td><button>Delete</button></td>
+						<td></td>
 					</tr>
 				)
 			}
@@ -90,22 +149,111 @@
 			render: function() {
 				var i = 0;
 				return (
-					<table className="results">
-						<tbody>
-							<button>Add</button>
-							{ this.props.results.map(function(result) {
+					<div className="results">
+						<table>
+							<tbody>
+								{ this.props.results.map(function(result) {
+									return (
+										<ResultsTableRow
+											key={ i++ }
+											teamA={{ name: result.teamA, score: result.teamA_Goals }}
+											teamB={{ name: result.teamB, score: result.teamB_Goals }}
+											kickOffAt={ result.kickOffAt }
+											fullTime={ result.fullTime }
+										/>
+									);
+								}) }
+							</tbody>
+						</table>
+					</div>
+				)
+			}
+		});
+
+		var FixturesTableRowDayHeader = React.createClass({
+			render: function() {
+				return (
+					<tr>
+						<th className="day-header" colSpan="7">{ this.props.date }</th>
+					</tr>
+				)
+			}
+		});
+
+		var FixturesTableRow = React.createClass({
+			render: function() {
+				var buttonClass = this.hasBeenPlayed() ? 'btn btn-sm btn-success' : 'btn btn-sm btn-success disabled';
+				return (
+					<tr>
+						<td className="date">{ moment(this.props.kickOffAt).format('h:mm a') }</td>
+						<td className="team-a">{ this.props.teamA.name }</td>
+						<td className="score">vs.</td>
+						<td className="team-b">{ this.props.teamB.name }</td>
+						<td className="report">{ this.props.fullTime ? "Full time" : "Still to play" }</td>
+						<td className="control-cell"><button className={ buttonClass }><span className="glyphicon glyphicon-flag"></span> Enter result</button></td>
+						<td className="control-cell"><button className="btn btn-sm btn-danger"><span className="glyphicon glyphicon-minus-sign"></span> Delete</button></td>
+					</tr>
+				)
+			},
+			hasBeenPlayed() {
+				return moment() > moment(this.props.kickOffAt).add(90, 'minutes');
+			}
+		});
+
+		var FixturesTable = React.createClass({
+
+			render: function() {
+
+				// group the fixtures by the day that they are on
+				var byDate = _(this.props.fixtures).groupBy(function(fixture) {
+						return moment(fixture.kickOffAt).startOf('day').toJSON();
+					});
+
+				// put the keys in chronological order
+				var orderedDateHeaders = _.chain(byDate)
+					.keys().sortBy(function(dtStr) {
+						return moment(dtStr).unix();
+					})
+					.value();
+
+				// create the fixture rows with headers, in the correct order.
+				var i = 0;
+				var rows = orderedDateHeaders.map(function(fixtureDay) {
+					var formatedDate = moment(fixtureDay).format('dddd Do MMMM');
+					var fixtureRows = [<FixturesTableRowDayHeader date={ formatedDate } />]
+					fixtureRows
+						.push(
+							_.chain(byDate[fixtureDay])
+							.sortBy(function(fixture) {
+								return moment(fixture.kickOffAt).unix()
+							}).map(function(fixture) {
 								return (
-									<ResultsTableRow
+									<FixturesTableRow
 										key={ i++ }
-										teamA={{ name: result.teamA, score: result.teamA_Goals }}
-										teamB={{ name: result.teamB, score: result.teamB_Goals }}
-										kickOffAt={ result.kickOffAt }
-										fullTime={ result.fullTime ? "Full time" : "Still to play" }
+										teamA={{ name: fixture.teamA, score: fixture.teamA_Goals }}
+										teamB={{ name: fixture.teamB, score: fixture.teamB_Goals }}
+										kickOffAt={ fixture.kickOffAt }
+										fullTime={ fixture.fullTime }
 									/>
 								);
-							}) }
-						</tbody>
-					</table>
+							})
+							.value()
+						);
+					return fixtureRows;
+				});
+
+				// return the wrapping DOM element
+				return (
+					<div className="fixtures">
+						<div className="global-actions">
+						<button className="btn btn-sm btn-success" data-toggle="modal" data-target="#add-fixture-dialog"><span className="glyphicon glyphicon-plus-sign"></span> Add fixture</button>
+						</div>
+						<table>
+							<tbody>
+								{ rows }
+							</tbody>
+						</table>
+					</div>
 				)
 			}
 		});
@@ -113,33 +261,35 @@
 		var LeagueTable = React.createClass({
 			render: function() {
 				var i = 0;
-				return <table className="league-table" id="large-league-table">
-					<thead>
-						<tr>
-							<th>></th>
-							<th>Position</th>
-							<th>Team</th>
-							<th>P</th>
-							<th>W</th>
-							<th>D</th>
-							<th>L</th>
-							<th>F</th>
-							<th>A</th>
-							<th>GD</th>
-							<th>Pts</th>
-							<th>Last 5 games</th>
-							<th>Report</th>
-						</tr>
-					</thead>
-					<tbody>
-						{ this.props.teamsStats.map(function(teamStats) {
-							return <LeagueTableRow
-								key={ i++ }
-								teamStats={ teamStats }
-							/>
-						}) }
-					</tbody>
-				</table>
+				return (
+					<div className="league-table" >
+						<table id="large-league-table">
+							<thead>
+								<tr>
+									<th className="centred">Position</th>
+									<th>Team</th>
+									<th className="centred">P</th>
+									<th className="centred">W</th>
+									<th className="centred">D</th>
+									<th className="centred">L</th>
+									<th className="centred">F</th>
+									<th className="centred">A</th>
+									<th className="centred">GD</th>
+									<th className="centred">Pts</th>
+									<th>Stats</th>
+								</tr>
+							</thead>
+							<tbody>
+								{ this.props.teamsStats.map(function(teamStats) {
+									return <LeagueTableRow
+										key={ i++ }
+										teamStats={ teamStats }
+									/>
+								}) }
+							</tbody>
+						</table>
+					</div>
+				);
 			}
 		});
 
@@ -151,7 +301,6 @@
 					stay: "flat"
 				};
 				return <tr>
-					<td></td>
 					<td className="centered position">
 						{ this.props.teamStats.position }
 						<div className={ arrowClassMap[this.props.teamStats.moved] } />
@@ -165,14 +314,12 @@
 					<td className="centered goals-against">{ this.props.teamStats.goalsAgainst }</td>
 					<td className="centered goal-diff">{ this.props.teamStats.goalDiff }</td>
 					<td className="centered points">{ this.props.teamStats.points }</td>
-					<td className="centered last-five-games"></td>
-					<td className="centered report"></td>
+					<td className="centered report control-cell"><button className="btn btn-sm btn-success"><span className="glyphicon glyphicon-stats"></span></button></td>
 				</tr>
 			}
 		});
 
 		$(document).ready(function() {
-
 
 			$.ajax({
 				url: "/table",
@@ -182,34 +329,165 @@
 						<LeagueTable teamsStats={ results } />,
 						document.getElementById('large-league-table')
 					);
-
 				}
 			});
 
 			$.ajax({
 				url: "/match",
 				success: function(data) {
-					var results = JSON.parse(data);
+					var matches = JSON.parse(data);
+					console.log('fixtures', matches)
 					ReactDOM.render(
-						<ResultsTable results={ results }/>,
-						document.getElementById('results')
-					);
-					
+						<FixturesTable fixtures={ matches }/>,
+						document.getElementById('fixtures')
+					);					
 				}
 			});
+
+			$.ajax({
+				url: "/match",
+				success: function(data) {
+					var matches = JSON.parse(data);
+					ReactDOM.render(
+						<ResultsTable results={ matches }/>,
+						document.getElementById('results')
+					);					
+				}
+			});
+
 		});
 	</script>
 </head>
 <body>
 
-	<h1>Table</h1>
+	<!-- Semantic UI for - can't find a datetimepicker for it though -->
+	<!-- <form id="add-match-form" class="ui form" action="/match">
+		<h4 class="ui dividing header">Add a new fixture or result</h4>
+		<div class="two fields">
+			<div class="field">
+				<label>Team A</label>
+				<input type="text" name="team-a-name" placeholder="Team A Name">
+			</div>
+			<div class="field">
+				<label>Team B</label>
+				<input type="text" name="team-b-name" placeholder="Team B Name">
+			</div>
+		</div>
+		<div class="field">
+			<label>Date</label>
+			<input type="text" name="date">
+		</div>
+		<button class="ui button" type="submit">Add team</button>
+	</form> -->
 
-	<div class="league-table" id="large-league-table">
-	</div>
+	<!-- Bootstrap form -->
+	<div class="container-fluid">
+		<div class="row">
+			<div class='col-sm-6'>
 
-	<h1>Results</h1>
+				<div id="add-fixture-dialog" class="modal fade" role="dialog">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h2>Create a new fixture</h2>
+							</div>
+							<div class="modal-body">
+								<form id="new-fixture-form">
+									<div class="form-group">
+										<label for="team-a-name">Team A</label>
+										<input name="teamA" type="text" id="team-a-name" class="form-control" placeholder="Team A Name" />
+									</div>
+									<div class="form-group">
+										<label for="team-b-name">Team B</label>
+										<input name="teamB" type="text" id="team-b-name" class="form-control" placeholder="Team B Name" />
+									</div>
+									<div class="form-group">
+										<label for="fixture-date">Kick off @</label>
+										<div class='input-group' id='fixture-date'>
+											<input name="kickOffAt" type='text' class="form-control" />
+											<span class="input-group-addon">
+												<span class="glyphicon glyphicon-calendar"></span>
+											</span>
+										</div>
+									</div>
+									<div class="form-group">
+										<button type="submit" class="btn btn-default" data-loading-text='<i class="fa fa-refresh fa-spin"></i> Saving...'>Add fixture</button>
+									</div>
+								</form>
+							</div>
+						</div>
+					</div>
+				</div>
 
-	<div class="results" id="results">
+			</div>
+			<script type="text/javascript">
+				$(function () {
+					$('#fixture-date').datetimepicker();
+				});
+
+				$('#new-fixture-form').on('submit', function(event) {
+					var $btn = $(this);
+
+					// change the button to display loading...
+					$btn.button('loading');
+
+					// get the form json into a key: value format
+					var data = {};
+					$(this).serializeArray().map(function(field) {
+						data[field.name] = field.value;
+					});
+
+					// convert kickOffAt to ISO8601 before it leaves the browser so we know timezone info.
+					// moment should do the right thing based on the browser settings.
+					data.kickOffAt = moment(new Date(data.kickOffAt)).toJSON();
+
+					$.ajax({
+						url: '/match',
+						method: 'POST',
+						contentType: 'application/json',
+						data: JSON.stringify(data),
+						success: function(data) {
+							$btn.button('reset');
+							$('#add-fixture-dialog').modal("hide");
+						},
+						error: function(error) {
+							alert(error);
+							$btn.button('reset');
+							$('#add-fixture-dialog').modal("hide");
+						}
+					});
+
+					event.preventDefault();
+				});
+
+			</script>
+		</div>
+
+		<div class="row">
+			<div class='col-sm-6'>
+
+				<h1>Fixtures</h1>
+
+				<div id="fixtures">
+				</div>
+				
+				<h1>Results</h1>
+
+				<div id="results">
+				</div>
+
+			</div>
+
+			<div class='col-sm-6'>
+			
+				<h1>Table</h1>
+
+				<div id="large-league-table">
+				</div>
+
+			</div>
+		</div>
+
 	</div>
 
 </body>

@@ -1,4 +1,6 @@
 var _ = require('underscore');
+var moment = require('moment');
+
 var express = require('express');
 var bodyParser = require('body-parser');
 var MongoClient = require('mongodb').MongoClient, assert = require('assert');
@@ -57,6 +59,8 @@ app.get('/table', function(req, res, next) {
 				// things we will reuse in this loop
 				var teamId = team._id.toHexString();
 				var teamMatches = matchesByTeam[teamId];
+
+				if (!teamMatches) return;
 
 				// initilise stats
 				teamStats[team.name] = teamStats[team.name] || {};
@@ -125,7 +129,7 @@ app.get('/table', function(req, res, next) {
 			_.chain(teamStatsAtGameBeforeLast)
 				.keys()
 				.sortBy(function(teamName) {
-					return -teamStatsAtGameBeforeLast[teamName].points
+					return -teamStatsAtGameBeforeLast[teamName].points;
 				})
 				.each(function(teamName) {
 					teamRankAtGameBeforeLast[teamName] = position++;
@@ -138,10 +142,10 @@ app.get('/table', function(req, res, next) {
 			_.chain(teamStats)
 				.keys()
 				.sortBy(function(teamName) {
-					return -teamStats[teamName].points
+					return -teamStats[teamName].points;
 				})
 				.each(function(teamName) {
-					teamRank[teamName] = position++;;
+					teamRank[teamName] = position++;
 				})
 				.value();
 
@@ -149,6 +153,8 @@ app.get('/table', function(req, res, next) {
 
 			// calculate the Points and add the team name, then fill in the gaps
 			teams.forEach(function(team) {
+
+				if (!teamStats[team.name]) return;
 
 				teamStats[team.name].name = team.name;
 				teamStats[team.name].position = teamRank[team.name];
@@ -186,6 +192,12 @@ app.get('/match', function(req, res, next) {
 	var matchStats = {};
 	match.find({}).toArray(function(err, matches) {
 
+		if(matches.length === 0) {
+			res.end(JSON.stringify([]));
+			next();
+			return;
+		}
+
 		var processed = 0;
 
 		matches.forEach(function(match) {
@@ -205,7 +217,6 @@ app.get('/match', function(req, res, next) {
 						teamA_Goals: match.teamA_Goals,
 						teamB: teamB.name,
 						teamB_Goals: match.teamB_Goals,
-						fullTime: match.fullTime,
 						kickOffAt: match.kickOffAt
 					};
 
@@ -226,17 +237,53 @@ app.get('/match', function(req, res, next) {
 
 app.post('/match', function(req, res, next) {
 
-	var data = _(req.body).pick('teamA', 'teamB', 'teamA_Goals', 'teamB_Goals', 'kickOffAt', 'fullTime');
-	data.kickOffAt = new Date(data.kickOffAt);
+	// validate fields
+	var requiredFields = ['teamA', 'teamB', 'kickOffAt'];
+	var optionalFields = ['teamA_Goals', 'teamB_Goals'];
+	var allFields = requiredFields.concat(optionalFields);
+
+	var missingRequiredFields = [];
+	_(requiredFields)
+		.each(function(requiredField) {
+			if(!req.body[requiredField]) missingRequiredFields.push(requiredField);
+		});
+	if(missingRequiredFields.length) {
+		res
+			.status(400)
+			.json({
+				error: 'Missing required fields: ' + missingRequiredFields.join(', ')
+			});
+		res.end();
+		next();
+		return;
+	}
+
+	// get the data in the form that we want
+	var data = _(req.body).pick.apply(_(req.body), allFields);
+	data.kickOffAt = moment(new Date(data.kickOffAt));
+
+	if(!data.kickOffAt.isValid()) {
+		res.status(400).json({ error: 'Invalid kickOffAt datetime string' });
+		res.end();
+		next();
+	}
+
+	data.kickOffAt = data.kickOffAt.toJSON();
+
+	// just set to 0 - 0 is there are no goals given. The fixture may not have been played yet.
+	// also set FullTime to false, assuming it hasn't been played.
+	data.teamA_Goals = data.teamA_Goals || 0;
+	data.teamB_Goals = data.teamB_Goals || 0;
+
 	
 	teamsFound = {
 		teamA: null,
 		teamB: null
 	};
 
-	function onGotTeam(AorB, insertedId) {
+	function onGotTeam(AorB, id) {
 		teamsFound[AorB] = true;
-		data[AorB] = insertedId;
+		data[AorB] = id;
 		if(teamsFound.teamA && teamsFound.teamB) {
 			db.collection('match').insert(data, function(err, result) {
 				if (err) throw err;
@@ -255,8 +302,8 @@ app.post('/match', function(req, res, next) {
 			} else {
 				db.collection('team').insert(
 					{ name: data.teamA },
-					function(err, doc) {
-						onGotTeam('teamA', doc._id);
+					function(err, r) {
+						onGotTeam('teamA', r.insertedIds[0]);
 					}
 				);
 			}
@@ -272,8 +319,8 @@ app.post('/match', function(req, res, next) {
 			} else {
 				db.collection('team').insert(
 					{ name: data.teamB },
-					function(err, doc) {
-						onGotTeam('teamB', doc._id);
+					function(err, r) {
+						onGotTeam('teamB', r.insertedIds[0]);
 					}
 				);
 			}

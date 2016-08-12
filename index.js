@@ -4,6 +4,7 @@ var moment = require('moment');
 var express = require('express');
 var bodyParser = require('body-parser');
 var MongoClient = require('mongodb').MongoClient, assert = require('assert');
+var ObjectID = require('mongodb').ObjectID;
  
 var url = 'mongodb://localhost:27017/futsal';
 
@@ -28,6 +29,10 @@ app.get('/table', function(req, res, next) {
 
 		// organise the matches by team...
 		matches.forEach(function(match) {
+			// if the match isn't finished, we'll skip it
+			if(moment(match.kickOffAt).add(90, 'minutes').isAfter(moment())) {
+				return;
+			}
 			matchesByTeam[match.teamA.toHexString()] = matchesByTeam[match.teamA.toHexString()] || [];
 			matchesByTeam[match.teamB.toHexString()] = matchesByTeam[match.teamB.toHexString()] || [];
 			matchesByTeam[match.teamA.toHexString()].push(match);
@@ -81,8 +86,8 @@ app.get('/table', function(req, res, next) {
 					var otherTeamKey = (teamId == match.teamA) ? 'teamB' : 'teamA';
 
 					var goals = {
-						teamA: match.teamA_Goals,
-						teamB: match.teamB_Goals
+						teamA: parseInt(match.teamA_Goals),
+						teamB: parseInt(match.teamB_Goals)
 					};
 
 					// calculate how many the teams have Played
@@ -213,6 +218,7 @@ app.get('/match', function(req, res, next) {
 				}, function(err, teamB) {
 
 					matchStats[match._id] = {
+						id: match._id,
 						teamA: teamA.name,
 						teamA_Goals: match.teamA_Goals,
 						teamB: teamB.name,
@@ -329,8 +335,62 @@ app.post('/match', function(req, res, next) {
 
 });
 
-app.delete('/match', function(req, res, next) {
+app.put('/match', function(req, res, next) {
 
+	// validate fields
+	var requiredFields = ['id', 'teamA_Goals', 'teamB_Goals'];
+	var allFields = requiredFields;
+
+	var missingRequiredFields = [];
+	_(requiredFields)
+		.each(function(requiredField) {
+			if(!req.body[requiredField]) missingRequiredFields.push(requiredField);
+		});
+	if(missingRequiredFields.length) {
+		res
+			.status(400)
+			.json({
+				error: 'Missing required fields: ' + missingRequiredFields.join(', ')
+			});
+		res.end();
+		next();
+		return;
+	}
+
+	// get the data in the form that we want
+	var data = _(req.body).pick.apply(_(req.body), allFields);
+	
+	db.collection('match').updateOne(
+		{ _id: ObjectID.createFromHexString(data.id) },
+		{ $set: _(data).pick('teamA_Goals', 'teamB_Goals') },
+		function(err, r) {
+			if(err) throw err;
+			res.end(JSON.stringify(r));
+			next();
+		}
+	);
+});
+
+app.delete('/match/:id', function(req, res, next) {
+	
+	if(!req.params.id) {
+		res
+			.status(400)
+			.json({
+				error: 'Missing required fields: id'
+			});
+		res.end();
+		next();
+		return;
+	}
+
+	db.collection('match').removeOne(
+		{ _id: ObjectID.createFromHexString(req.params.id) },
+		function(err, r) {
+		if(err) throw err;
+		res.end(JSON.stringify(r));
+		next();
+	});
 });
 
 MongoClient.connect(url, function(err, dbHandle) {

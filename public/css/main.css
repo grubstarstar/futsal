@@ -35,9 +35,12 @@ div.league-table table th {
 	font-weight: normal;
 }
 
-div.league-table td.chart {
+div.league-table tr.chart {
+	display: none;
+}
+div.league-table tr.chart td {
 	padding: 0;
-	background: linear-gradient(rgba(255, 255, 0, 0.15), white);
+	// background: linear-gradient(rgba(255, 255, 0, 0.15), white);
 }
 
 table td.centered {
@@ -46,7 +49,7 @@ table td.centered {
 
 div.results table td[class^=team-],
 div.fixtures table td[class^=team-] {
-	width: 10em;
+	// width: 10em;
 }
 
 div.results table td.team-a,

@@ -12,9 +12,8 @@
 			for(var i = 0; i < this.props.lastFive.length; i++) {
 				reversedLastFive[i] = this.props.lastFive[(this.props.lastFive.length - 1) - i];
 			}
-			console.log('lastFive', this.props.lastFive);
-			return <tr style={{ background: "#fff" }}>
-				<td colSpan="11" className="chart">
+			return <tr style={{ background: "#fff" }} className="chart">
+				<td colSpan="11">
 					<svg height="120" width="inherit">
 						
 						{ [0,1,2,3,4,5,6,7].map(function(num) {
@@ -93,6 +92,9 @@
 					</svg>
 				</td>
 			</tr>
+		},
+		toggleShow: function() {
+			$(ReactDOM.findDOMNode(this)).toggle();
 		}
 	});
 
@@ -117,11 +119,8 @@
 				<td className="centered goals-against">{ this.props.teamStats.goalsAgainst }</td>
 				<td className="centered goal-diff">{ this.props.teamStats.goalDiff }</td>
 				<td className="centered points">{ this.props.teamStats.points }</td>
-				<td className="centered report control-cell"><button onClick={ this.showChart() } className="btn btn-sm btn-success"><span className="glyphicon glyphicon-stats"></span></button></td>
+				<td className="centered report control-cell"><button onClick={ this.props.onStatButtonClick } className="btn btn-sm btn-success"><span className="glyphicon glyphicon-stats"></span></button></td>
 			</tr>
-		},
-		showChart: function() {
-
 		}
 	});
 
@@ -154,20 +153,30 @@
 			);
 		},
 		getRows: function() {
+			function toggleChart() {
+				console.log('in toggleChart', this);
+				console.log(this.refs);
+			}
 			var i = 0;
 			var rows = this.props.teamsStats.map(function(teamStats) {
 				var rv = [];
 				rv[0] = <LeagueTableRow
 						key={ i++ }
 						teamStats={ teamStats }
+						onStatButtonClick={ this.onStatButtonClick.bind(this, i) }
 					/>
 				rv[1] = <LeagueTableRowStats
+						ref={ 'teamStat' + i }
 						key={ i++ }
 						lastFive={ teamStats.lastFive }
 					/>
 				return rv;
-			})
+			}.bind(this))
 			return _.flatten(rows);
+		},
+		onStatButtonClick: function(relatedTeamStatRowIdx) {
+			var key = 'teamStat' + relatedTeamStatRowIdx;
+			this.refs[key].toggleShow();
 		}
 	});
 

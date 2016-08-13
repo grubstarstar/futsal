@@ -2,44 +2,94 @@
 
 	var LeagueTableRowStats = React.createClass({
 		render: function() {
+			var height = 120;
+			var leftRightPadding = 15;
+			var topBottomPadding = 15;
+			var xMultiplier = 70;
+			var yMultiplier = 15;
+			var gridWidth = ( 7 * xMultiplier ) + leftRightPadding;
+			var reversedLastFive = [];
+			for(var i = 0; i < this.props.lastFive.length; i++) {
+				reversedLastFive[i] = this.props.lastFive[(this.props.lastFive.length - 1) - i];
+			}
+			console.log('lastFive', this.props.lastFive);
 			return <tr style={{ background: "#fff" }}>
-				<td colSpan="11">
-					<svg height="120" width="500">
+				<td colSpan="11" className="chart">
+					<svg height="120" width="inherit">
 						
-						<line x1="0" y1="0" x2="0" y2="120" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="70" y1="0" x2="70" y2="120" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="140" y1="0" x2="140" y2="120" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="210" y1="0" x2="210" y2="120" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="280" y1="0" x2="280" y2="120" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="350" y1="0" x2="350" y2="120" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="420" y1="0" x2="420" y2="120" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="490" y1="0" x2="490" y2="120" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
+						{ [0,1,2,3,4,5,6,7].map(function(num) {
+							return <line
+								key={ num }
+								x1={ (num * xMultiplier) + leftRightPadding }
+								y1={ 0 }
+								x2={ (num * xMultiplier) + leftRightPadding }
+								y2={ height - topBottomPadding }
+								style={{ stroke: "#CCC", strokeWidth: "1px", strokeDasharray: "1,1" }}
+							/>
+							
+						})}
 
-						<line x1="0" y1="0" x2="490" y2="0" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="0" y1="15" x2="490" y2="15" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="0" y1="30" x2="490" y2="30" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="0" y1="45" x2="490" y2="45" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="0" y1="60" x2="490" y2="60" style={{ stroke: "#333", strokeWidth: 1, strokeDasharray: "5,2" }} />
-						<line x1="0" y1="75" x2="490" y2="75" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="0" y1="90" x2="490" y2="90" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="0" y1="105" x2="490" y2="105" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
-						<line x1="0" y1="120" x2="490" y2="120" style={{ stroke: "#7D7D7D", strokeWidth: 1, strokeDasharray: "2,2" }} />
+						{ [0,1,2,3,4,5,6].map(function(num) {
+							return <line
+								key={ num }
+								x1={ 0 }
+								y1={ (num * yMultiplier) + topBottomPadding }
+								x2={ gridWidth }
+								y2={ (num * yMultiplier) + topBottomPadding }
+								style={{ stroke: "#AAA", strokeWidth: "1px", strokeDasharray: "1,1" }}
+							/>
+							
+						})}
 
-						<circle cx="0" cy="0" r="4" fill="rgb(235, 95, 95)" />
-						<line x1="0" y1="0" x2="70" y2="120" style={{ stroke: "rgb(235, 95, 95)", strokeWidth: 2 }} />
-						<circle cx="70" cy="120" r="4" fill="rgb(235, 95, 95)" />
-						<line x1="70" y1="120" x2="140" y2="45" style={{ stroke: "rgb(235, 95, 95)", strokeWidth: 2 }} />
-						<circle cx="140" cy="45" r="4" fill="rgb(235, 95, 95)" />
-						<line x1="140" y1="45" x2="210" y2="30" style={{ stroke: "rgb(235, 95, 95)", strokeWidth: 2 }} />
-						<circle cx="210" cy="30" r="4" fill="rgb(235, 95, 95)" />
-						<line x1="210" y1="30" x2="280" y2="90" style={{ stroke: "rgb(235, 95, 95)", strokeWidth: 2 }} />
-						<circle cx="280" cy="90" r="4" fill="rgb(235, 95, 95)" />
-						<line x1="280" y1="90" x2="350" y2="105" style={{ stroke: "rgb(235, 95, 95)", strokeWidth: 2 }} />
-						<circle cx="350" cy="105" r="4" fill="rgb(235, 95, 95)" />
-						<line x1="350" y1="105" x2="420" y2="60" style={{ stroke: "rgb(235, 95, 95)", strokeWidth: 2 }} />
-						<circle cx="420" cy="60" r="4" fill="rgb(235, 95, 95)" />
-						<line x1="420" y1="60" x2="490" y2="105" style={{ stroke: "rgb(235, 95, 95)", strokeWidth: 2 }} />
-						<circle cx="490" cy="105" r="4" fill="rgb(235, 95, 95)" />
+						{ reversedLastFive.map(function(matchStats, idx) {
+							if(height - topBottomPadding - (matchStats.goalsFor * yMultiplier) < topBottomPadding) {
+								var xCenter = gridWidth - (idx * xMultiplier);
+								var yCenter = topBottomPadding;
+								var vertOffset = 5;
+								var triangleSize = 12;
+								var points = [{
+									x: xCenter - (triangleSize / 2),
+									y: yCenter - vertOffset + (triangleSize * 0.866 / 2)
+								},{
+									x: xCenter,
+									y: yCenter - vertOffset - (triangleSize * 0.866 / 2)
+								},{
+									x: xCenter + (triangleSize / 2),
+									y: yCenter - vertOffset + (triangleSize * 0.866 / 2)
+								}];
+								var pointsStrs = [];
+								points.forEach(function(point, idx) {
+									pointsStrs[idx] = pointsStrs[idx] || "";
+									pointsStrs[idx] += point.x + "," + point.y;
+								});
+								return <polygon
+									points={ pointsStrs.join(" ") }
+									style={{ fill: "rgba(22, 195, 235, 0.5)", stroke: "rgb(66, 34, 235)", strokeWidth: 2 }}
+								/>
+							}
+							return <circle
+								key={ idx }
+								cx={ gridWidth - (idx * xMultiplier) }
+								cy={ height - topBottomPadding - (matchStats.goalsFor * yMultiplier) }
+								r="6"
+								stroke="rgb(66, 34, 235)"
+								strokeWidth="2"
+								fill="rgba(22, 195, 235, 0.5)"
+							/>
+						}) }
+
+						{ reversedLastFive.map(function(matchStats, idx) {
+							return <circle
+								key={ idx }
+								cx={ gridWidth - (idx * xMultiplier) }
+								cy={ height - topBottomPadding - (matchStats.goalsAgainst * yMultiplier) }
+								r="6"
+								stroke="rgb(255, 45, 95)"
+								strokeWidth="2"
+								fill="rgba(235, 95, 95, 0.3)"
+							/>
+						}) }
+
 					</svg>
 				</td>
 			</tr>
@@ -113,7 +163,7 @@
 					/>
 				rv[1] = <LeagueTableRowStats
 						key={ i++ }
-						teamStats={ teamStats }
+						lastFive={ teamStats.lastFive }
 					/>
 				return rv;
 			})

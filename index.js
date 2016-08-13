@@ -50,6 +50,12 @@ app.get('/table', function(req, res, next) {
 		// now fetch the teams out of the database
 		team.find({}).toArray(function(err, teams) {
 
+			// build a lookup of team ID to name
+			var teamIdName = {};
+			teams.forEach(function(team) {
+				teamIdName[team._id] = team.name;
+			});
+
 			// this will hold the table stats for each team at the
 			// current time, once we've iterated through them fully
 			var teamStats = {};
@@ -78,6 +84,7 @@ app.get('/table', function(req, res, next) {
 				teamStats[team.name].goalDiff = teamStats[team.name].goalDiff || 0;
 				teamStats[team.name].points = teamStats[team.name].points || 0;
 				teamStats[team.name].position = teamStats[team.name].position || 0;
+				teamStats[team.name].lastFive = teamStats[team.name].lastFive || [];
 
 				// go through each match the team has played, working out stats for the team as we go
 				teamMatches.forEach(function(match, idx, arr) {
@@ -122,6 +129,17 @@ app.get('/table', function(req, res, next) {
 					// they've gone up or down since the game before last.
 					if(idx == teamMatches.length - 2) {
 						teamStatsAtGameBeforeLast[team.name] = _.clone(teamStats[team.name]);
+					}
+
+					var otherTeamName = teamIdName[match[otherTeamKey]];
+
+					if(idx >= teamMatches.length - 5) {
+						teamStats[team.name].lastFive.push({
+							goalsFor: goals[teamKey],
+							goalsAgainst: goals[otherTeamKey],
+							playingAgainst: otherTeamName,
+							kickOffAt: match.kickOffAt
+						});
 					}
 
 				});

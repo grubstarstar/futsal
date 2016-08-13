@@ -35,6 +35,11 @@ div.league-table table th {
 	font-weight: normal;
 }
 
+div.league-table td.chart {
+	padding: 0;
+	background: linear-gradient(rgba(255, 255, 0, 0.15), white);
+}
+
 table td.centered {
 	text-align: center;
 }

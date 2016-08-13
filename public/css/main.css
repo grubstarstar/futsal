@@ -1,0 +1,100 @@
+body {
+	font-family: Verdana,
+	"sans-serif";
+}
+
+div.league-table table,
+div.fixtures table {
+	border-collapse: collapse;
+	background: #E6E6E6;
+}
+
+div.league-table,
+div.results,
+div.fixtures {
+	font-size: 0.8em;
+}
+
+div.league-table div.global-actions,
+div.results div.global-actions,
+div.fixtures div.global-actions {
+	margin-bottom: 1em;
+}
+
+div.league-table table td,
+div.league-table table th,
+div.fixtures table td,
+div.fixtures table th {
+	border: solid white 0.2em;
+	padding: 0.6em 1em;
+}
+
+div.league-table table th {
+	background: #191919;
+	color: #FFFFFF;
+	font-weight: normal;
+}
+
+table td.centered {
+	text-align: center;
+}
+
+div.results table td[class^=team-],
+div.fixtures table td[class^=team-] {
+	width: 10em;
+}
+
+div.results table td.team-a,
+div.fixtures table td.team-a {
+	text-align: right;
+}
+
+div.fixtures table th.day-header {
+	background: #808080;
+	color: #FFFFFF;
+	font-weight: normal;
+}
+
+div.fixtures table tr.has-been-played {
+	font-weight: bold;
+	color: #333333
+}
+
+/* keep the vert padding slim on cells that contain buttons */
+div.fixtures table td.control-cell,
+div.league-table table td.control-cell {
+	padding: 0.4em 0.3em;
+}
+
+button.btn-sm {
+	padding: 0.15em 0.4em;
+}
+
+.arrow-up {
+	display: inline-block;
+	margin-top: 0.3em;
+	margin-left: 0.8em;
+	width: 0; 
+	height: 0; 
+	border-left: 0.4em solid transparent;
+	border-right: 0.4em solid transparent;
+	border-bottom: calc((0.4em + 0.4em) * 0.866) solid green;
+}
+.arrow-down {
+	display: inline-block;
+	margin-top: 0.3em;
+	margin-left: 0.8em;
+	width: 0; 
+	height: 0; 
+	border-left: 0.4em solid transparent;
+	border-right: 0.4em solid transparent;
+	border-top: calc((0.4em + 0.4em) * 0.866) solid red;
+}
+.flat {
+	display: inline-block;
+	margin-top: 0.3em;
+	margin-left: 0.8em;
+	width: 0.63em; 
+	height: 0.1em; 
+	border-top: 0.3em solid #B3B3B3;
+}

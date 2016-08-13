@@ -2,100 +2,9 @@
 <html>
 <head>
 	<meta charset="UTF-8">
-	<title>Document</title>
-	<style>
-		body {
-			font-family: Verdana, "sans-serif";
-		}
-		div.league-table table, div.fixtures table {
-			border-collapse: collapse;
-			background: #E6E6E6;
-		}
-		div.league-table, div.results, div.fixtures {
-			font-size: 0.8em;
-		}
-		div.league-table div.global-actions, div.results div.global-actions, div.fixtures div.global-actions {
-			margin-bottom: 1em;
-		}
-		div.league-table table td, div.league-table table th, div.fixtures table td, div.fixtures table th {
-			border: solid white 0.2em;
-			padding: 0.6em 1em;
-		}
-		div.league-table table th {
-			background: #191919;
-			color: #FFFFFF;
-			font-weight: normal;
-		}
-		table td.centered {
-			text-align: center;
-		}
+	<title>Futsal</title>
+	<link rel="stylesheet" href="css/main.css" />
 
-		div.results table td[class^=team-], div.fixtures table td[class^=team-] {
-			width: 10em;
-		}
-		div.results table td.team-a, div.fixtures table td.team-a {
-			text-align: right;
-		}
-		div.fixtures table th.day-header {
-			background: #808080;
-			color: #FFFFFF;
-			font-weight: normal;
-		}
-		div.fixtures table tr.has-been-played {
-			font-weight: bold;
-			color: #333333
-		}
-		/* keep the vert padding slim on cells that contain buttons */
-		div.fixtures table td.control-cell, div.league-table table td.control-cell {
-			padding: 0.4em 0.3em;
-		}
-
-		button.btn-sm {
-			padding: 0.15em 0.4em;
-		}
-		/*div.fixtures button {
-			background: #4C4C4C;
-			color: white;
-			border: none;
-			border-radius: 0.2em;
-			transition: background 0.2s;
-		}
-		div.fixtures button:hover {
-			background: #666666;
-			color: white;
-		}*/
-
-		.arrow-up {
-			display: inline-block;
-			margin-top: 0.3em;
-			margin-left: 0.8em;
-			width: 0; 
-			height: 0; 
-			border-left: 0.4em solid transparent;
-			border-right: 0.4em solid transparent;
-			border-bottom: calc((0.4em + 0.4em) * 0.866) solid green;
-		}
-		.arrow-down {
-			display: inline-block;
-			margin-top: 0.3em;
-			margin-left: 0.8em;
-			width: 0; 
-			height: 0; 
-			border-left: 0.4em solid transparent;
-			border-right: 0.4em solid transparent;
-			border-top: calc((0.4em + 0.4em) * 0.866) solid red;
-		}
-		.flat {
-			display: inline-block;
-			margin-top: 0.3em;
-			margin-left: 0.8em;
-			width: 0.63em; 
-			height: 0.1em; 
-			border-top: 0.3em solid #B3B3B3;
-		}
-	</style>
-
-	<!-- <script type="text/javascript" src="jquery/dist/jquery.js"></script> -->
 	<!-- looks like we need this version for bootstrap datetimepicker... -->
 	<script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
 
@@ -105,11 +14,6 @@
 
 	<script type="text/javascript" src="eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
 
-
-	<!-- JQuery Datepicker -->
-	<!-- <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.js"></script> -->
-	<!-- <link rel="stylesheet" href="//code.jquery.com/ui/1.12.0/themes/base/jquery-ui.css"> -->
-
 	<!-- React -->
 	<script src="https://npmcdn.com/react@15.3.0/dist/react.js"></script>
 	<script src="https://npmcdn.com/react-dom@15.3.0/dist/react-dom.js"></script>
@@ -118,11 +22,9 @@
 	<!-- Underscore -->
 	<script src="underscore/underscore.js" type="text/javascript"></script>
 
-	<!-- Semantic UI -->
-	<!-- <link rel="stylesheet" type="text/css" href="dist/semantic.min.css"> -->
-	<!-- <script src="dist/semantic.min.js"></script> -->
-
-	<!-- <script src="scripts/react/results-table.jsx" type="text/babel"></script> -->
+	<!-- The react components -->
+	<script src="scripts/react/fixtures.jsx" type="text/babel"></script>
+	<script src="scripts/react/league-table.jsx" type="text/babel"></script>
 
 	<!-- Bootstrap CSS -->
 	<link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css" />
@@ -134,228 +36,9 @@
 	<script type="text/babel">
 
 		$(document).ready(function() {
-
-			var FixturesTableRowDayHeader = React.createClass({
-				render: function() {
-					return (
-						<tr>
-							<th className="day-header" colSpan="7">{ this.props.date }</th>
-						</tr>
-					)
-				}
-			});
-
-			var FixturesTableRow = React.createClass({
-				componentDidMount: function() {
-					// set up the edit result modal dialog for this row
-					this.editResultDialog = $('#edit-result-dialog').clone();
-					this.editResultDialog.find('input[name="id"]').val(this.props.fixture.id);
-					this.editResultForm = this.editResultDialog.find('#edit-result-form');
-					this.editResultForm.on('submit', this.putResult);
-					// set up the delete result modal dialog for this row
-					this.confirmDeleteDialog = $('#delete-result-dialog').clone();
-					this.confirmDeleteDialog.find('button#delete-button').on('click', this.deleteResult);
-					this.confirmDeleteDialog.find('button#cancel-button').on('click', this.cancelDelete);
-				},
-				render: function() {
-					var buttonClass = this.hasBeenPlayed() ? 'btn btn-sm btn-success' : 'btn btn-sm btn-success disabled';
-					var score = this.hasBeenPlayed() ? this.props.fixture.teamA_Goals + " - " + this.props.fixture.teamB_Goals : "vs.";
-					var stillToPlay = this.hasBeenPlayed() ? "has-been-played" : "";
-					return (
-						<tr className={ stillToPlay }>
-							<td className="date">{ moment(this.props.fixture.kickOffAt).format('h:mm a') }</td>
-							<td className="team-a">{ this.props.fixture.teamA }</td>
-							<td className="centered score">{ score }</td>
-							<td className="team-b">{ this.props.fixture.teamB }</td>
-							<td className="report">{ this.hasBeenPlayed() ? "Full time" : "Still to play" }</td>
-							<td className="control-cell"><button className={ buttonClass } onClick={ this.onEdit }><span className="glyphicon glyphicon-flag"></span> Enter result</button></td>
-							<td className="control-cell"><button className="btn btn-sm btn-danger" onClick={ this.onDelete }><span className="glyphicon glyphicon-minus-sign"></span> Delete</button></td>
-						</tr>
-					)
-				},
-				hasBeenPlayed: function() {
-					return moment() > moment(this.props.fixture.kickOffAt).add(90, 'minutes');
-				},
-				onEdit: function() {
-					this.editResultDialog.modal('show');
-				},
-				putResult: function(event) {
-
-					var btn = $(this.editResultForm).find('button');
-
-					// change the button to display loading...
-					btn.button('loading');
-
-					// get the form json into a key: value format
-					var data = {};
-					$(this.editResultForm).serializeArray().map(function(field) {
-						data[field.name] = field.value;
-					});
-
-					console.log("PUT JSON", data);
-					console.log("PUT JSON", JSON.stringify(data));
-
-					$.ajax({
-						url: '/match',
-						method: 'PUT',
-						contentType: 'application/json',
-						data: JSON.stringify(data),
-						success: function(data) {
-							btn.button('reset');
-							this.editResultDialog.modal("hide");
-						}.bind(this),
-						error: function(error) {
-							alert(error);
-							btn.button('reset');
-							this.editResultDialog.modal("hide");
-						}.bind(this)
-					});
-
-					event.preventDefault();
-				},
-				onDelete: function() {
-					this.confirmDeleteDialog.modal('show');
-				},
-				cancelDelete: function() {
-					this.confirmDeleteDialog.modal('hide');
-				},
-				deleteResult: function(event) {
-
-					var id = this.props.fixture.id;
-
-					$.ajax({
-						url: '/match/' + id,
-						method: 'DELETE',
-						success: function(data) {
-							this.confirmDeleteDialog.modal("hide");
-						}.bind(this),
-						error: function(error) {
-							alert(error);
-							this.confirmDeleteDialog.modal("hide");
-						}.bind(this)
-					});
-
-					event.preventDefault();
-				}		
-			});
-
-			var FixturesTable = React.createClass({
-
-				render: function() {
-
-					// group the fixtures by the day that they are on
-					var byDate = _(this.props.fixtures).groupBy(function(fixture) {
-							return moment(fixture.kickOffAt).startOf('day').toJSON();
-						});
-
-					// put the keys in chronological order
-					var orderedDateHeaders = _.chain(byDate)
-						.keys().sortBy(function(dtStr) {
-							return moment(dtStr).unix();
-						})
-						.value();
-
-					// create the fixture rows with headers, in the correct order.
-					var i = 0;
-					var rows = orderedDateHeaders.map(function(fixtureDay) {
-						var formatedDate = moment(fixtureDay).format('dddd Do MMMM');
-						var fixtureRows = [<FixturesTableRowDayHeader date={ formatedDate } />]
-						fixtureRows
-							.push(
-								_.chain(byDate[fixtureDay])
-								.sortBy(function(fixture) {
-									return moment(fixture.kickOffAt).unix()
-								}).map(function(fixture) {
-									return (
-										<FixturesTableRow
-											key={ i++ }
-											fixture={ fixture }
-										/>
-									);
-								})
-								.value()
-							);
-						return fixtureRows;
-					});
-
-					// return the wrapping DOM element
-					return (
-						<div className="fixtures">
-							<div className="global-actions">
-							<button className="btn btn-sm btn-success" data-toggle="modal" data-target="#add-fixture-dialog"><span className="glyphicon glyphicon-plus-sign"></span> Add fixture</button>
-							</div>
-							<table>
-								<tbody>
-									{ rows }
-								</tbody>
-							</table>
-						</div>
-					)
-				}
-			});
-
-			var LeagueTable = React.createClass({
-				render: function() {
-					var i = 0;
-					return (
-						<div className="league-table" >
-							<table id="large-league-table">
-								<thead>
-									<tr>
-										<th className="centred">Position</th>
-										<th>Team</th>
-										<th className="centred">P</th>
-										<th className="centred">W</th>
-										<th className="centred">D</th>
-										<th className="centred">L</th>
-										<th className="centred">F</th>
-										<th className="centred">A</th>
-										<th className="centred">GD</th>
-										<th className="centred">Pts</th>
-										<th>Stats</th>
-									</tr>
-								</thead>
-								<tbody>
-									{ this.props.teamsStats.map(function(teamStats) {
-										return <LeagueTableRow
-											key={ i++ }
-											teamStats={ teamStats }
-										/>
-									}) }
-								</tbody>
-							</table>
-						</div>
-					);
-				}
-			});
-
-			var LeagueTableRow = React.createClass({
-				render: function() {
-					var arrowClassMap = {
-						up: "arrow-up",
-						down: "arrow-down",
-						stay: "flat"
-					};
-					return <tr>
-						<td className="centered position">
-							{ this.props.teamStats.position }
-							<div className={ arrowClassMap[this.props.teamStats.moved] } />
-						</td>
-						<td className="team">{ this.props.teamStats.name }</td>
-						<td className="centered played">{ this.props.teamStats.played }</td>
-						<td className="centered won">{ this.props.teamStats.won }</td>
-						<td className="centered drawn">{ this.props.teamStats.drawn }</td>
-						<td className="centered lost">{ this.props.teamStats.lost }</td>
-						<td className="centered goals-for">{ this.props.teamStats.goalsFor }</td>
-						<td className="centered goals-against">{ this.props.teamStats.goalsAgainst }</td>
-						<td className="centered goal-diff">{ this.props.teamStats.goalDiff }</td>
-						<td className="centered points">{ this.props.teamStats.points }</td>
-						<td className="centered report control-cell"><button className="btn btn-sm btn-success"><span className="glyphicon glyphicon-stats"></span></button></td>
-					</tr>
-				}
-			});
-
-		
+			
+			var FixturesTable = window.FixturesTable;
+			var LeagueTable = window.LeagueTable;
 
 			$.ajax({
 				url: "/table",
@@ -372,7 +55,6 @@
 				url: "/match",
 				success: function(data) {
 					var matches = JSON.parse(data);
-					console.log('fixtures', matches)
 					ReactDOM.render(
 						<FixturesTable fixtures={ matches }/>,
 						document.getElementById('fixtures')

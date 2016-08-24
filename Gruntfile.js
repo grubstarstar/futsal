@@ -8,7 +8,12 @@ module.exports = function (grunt) {
 							'babelify',
 							{ presets: [ 'es2015', 'react' ] }
 						]
-					]
+					],
+			        browserifyOptions: {
+			          paths: [
+			            "node_modules"
+			          ]
+			        }
 				},
 				files: {
 					"./public/bundle.js": ["./src/app.js"]

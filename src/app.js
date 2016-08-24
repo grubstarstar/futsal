@@ -1,15 +1,9 @@
-import Fixtures from './react/fixtures.jsx';
+import FixturesTable from './react/fixtures.jsx';
 import LeagueTable from './react/league-table.jsx';
-
-console.log('Fixtures', Fixtures);
-console.log('LeagueTable', LeagueTable);
-
-_.map([1,2,3,4,5], (i) => console.log(i));
+import ReactDOM from 'react-dom';
+import React from 'react';
 
 $(document).ready(function() {
-
-	var FixturesTable = window.FixturesTable;
-	var LeagueTable = window.LeagueTable;
 
 	$.ajax({
 		url: "/table",

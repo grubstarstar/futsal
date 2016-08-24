@@ -17,25 +17,23 @@
 					<svg height="120" width="inherit">
 						
 						{ [0,1,2,3,4,5,6,7].map(function(num) {
-							return <line
+							return <line className="horizontal-grid"
 								key={ num }
 								x1={ (num * xMultiplier) + leftRightPadding }
 								y1={ 0 }
 								x2={ (num * xMultiplier) + leftRightPadding }
 								y2={ height - topBottomPadding }
-								style={{ stroke: "#CCC", strokeWidth: "1px", strokeDasharray: "1,1" }}
 							/>
 							
 						})}
 
 						{ [0,1,2,3,4,5,6].map(function(num) {
-							return <line
+							return <line className="vertical-grid"
 								key={ num }
 								x1={ 0 }
 								y1={ (num * yMultiplier) + topBottomPadding }
 								x2={ gridWidth }
 								y2={ (num * yMultiplier) + topBottomPadding }
-								style={{ stroke: "#AAA", strokeWidth: "1px", strokeDasharray: "1,1" }}
 							/>
 							
 						})}
@@ -119,7 +117,16 @@
 				<td className="centered goals-against">{ this.props.teamStats.goalsAgainst }</td>
 				<td className="centered goal-diff">{ this.props.teamStats.goalDiff }</td>
 				<td className="centered points">{ this.props.teamStats.points }</td>
-				<td className="centered report control-cell"><button onClick={ this.props.onStatButtonClick } className="btn btn-sm btn-success"><span className="glyphicon glyphicon-stats"></span></button></td>
+				<td className="centered report control-cell">
+					<button
+						onClick={ this.props.onStatButtonClick }
+						className="btn btn-sm btn-success"
+						data-toggle="tooltip"
+						data-placement="right"
+						title="Scores for last few games">
+						<span className="glyphicon glyphicon-stats"></span>
+					</button>
+				</td>
 			</tr>
 		}
 	});
@@ -132,17 +139,17 @@
 					<table id="large-league-table">
 						<thead>
 							<tr>
-								<th className="centred">Position</th>
-								<th>Team</th>
-								<th className="centred">P</th>
-								<th className="centred">W</th>
-								<th className="centred">D</th>
-								<th className="centred">L</th>
-								<th className="centred">F</th>
-								<th className="centred">A</th>
-								<th className="centred">GD</th>
-								<th className="centred">Pts</th>
-								<th>Stats</th>
+								<th className="centred"><div>Position</div></th>
+								<th><div>Team</div></th>
+								<th className="centred"><div data-toggle="tooltip" title="Position">P</div></th>
+								<th className="centred"><div data-toggle="tooltip" title="Won">W</div></th>
+								<th className="centred"><div data-toggle="tooltip" title="Drawn">D</div></th>
+								<th className="centred"><div data-toggle="tooltip" title="Lost">L</div></th>
+								<th className="centred"><div data-toggle="tooltip" title="Goals for">F</div></th>
+								<th className="centred"><div data-toggle="tooltip" title="Goals against">A</div></th>
+								<th className="centred"><div data-toggle="tooltip" title="Goal difference">GD</div></th>
+								<th className="centred"><div data-toggle="tooltip" title="Points">Pts</div></th>
+								<th><div data-toggle="tooltip" title="Scores for last few games">Stats</div></th>
 							</tr>
 						</thead>
 						<tbody>

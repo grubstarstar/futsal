@@ -22,10 +22,17 @@ div.fixtures div.global-actions {
 }
 
 div.league-table table td,
-div.league-table table th,
 div.fixtures table td,
 div.fixtures table th {
 	border: solid white 0.2em;
+	padding: 0.6em 1em;
+}
+
+div.league-table table th {
+	border: solid white 0.2em;
+}
+
+div.league-table table th > div {
 	padding: 0.6em 1em;
 }
 
@@ -40,7 +47,17 @@ div.league-table tr.chart {
 }
 div.league-table tr.chart td {
 	padding: 0;
-	// background: linear-gradient(rgba(255, 255, 0, 0.15), white);
+	background: rgba(255, 255, 0, 0.1);
+}
+div.league-table tr.chart td svg line.horizontal-grid {
+	stroke: #CCC;
+	stroke-width: 1px;
+	// stroke-dasharray: 1,1
+}
+div.league-table tr.chart td svg line.vertical-grid {
+	stroke: #AAA;
+	stroke-width: 1px;
+	// stroke-dasharray: 1,1
 }
 
 table td.centered {

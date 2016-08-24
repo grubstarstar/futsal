@@ -9,9 +9,11 @@
 			var yMultiplier = 15;
 			var gridWidth = ( 7 * xMultiplier ) + leftRightPadding;
 			var reversedLastFive = [];
+
 			for(var i = 0; i < this.props.lastFive.length; i++) {
 				reversedLastFive[i] = this.props.lastFive[(this.props.lastFive.length - 1) - i];
 			}
+			
 			return <tr style={{ background: "#fff" }} className="chart">
 				<td colSpan="11">
 					<svg height="120" width="inherit">

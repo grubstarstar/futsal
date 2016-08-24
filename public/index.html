@@ -1,32 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 	<meta charset="UTF-8">
 	<title>Futsal</title>
-	<link rel="stylesheet" href="css/main.css" />
 
-	<!-- looks like we need this version for bootstrap datetimepicker... -->
+	<!-- JavaScript -->
+
+	<!-- JQuery: looks like we need this version for bootstrap datetimepicker... -->
 	<script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
-
-	<script type="text/javascript" src="moment/min/moment.min.js"></script>
 
 	<script type="text/javascript" src="bootstrap/dist/js/bootstrap.min.js"></script>
 
+	<!-- Tether: Used for the Bootstrap tooltip plugin -->
 	<script type="text/javascript" src="/tether/dist/js/tether.js"></script>
 
+	<!-- Moment: Used in my application code and bootstrap-datetimepicker -->
+	<script type="text/javascript" src="moment/min/moment.min.js"></script>
+
+	<!-- Bootstrap datetimepicker: a date time field for forms -->
 	<script type="text/javascript" src="eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
 
-	<!-- React -->
+	<!-- React & ReactDOM -->
 	<script src="https://npmcdn.com/react@15.3.0/dist/react.js"></script>
 	<script src="https://npmcdn.com/react-dom@15.3.0/dist/react-dom.js"></script>
-	<script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
 
-	<!-- Underscore -->
+	<!-- Underscore: I use this my application code -->
 	<script src="underscore/underscore.js" type="text/javascript"></script>
 
-	<!-- The react components -->
-	<script src="scripts/react/fixtures.jsx" type="text/babel"></script>
-	<script src="scripts/react/league-table.jsx" type="text/babel"></script>
+	<!-- My bundle: consists of app.js entry point and all imported application code. Transpiled using babelify allowing for ES6 and JSX -->
+	<script src="bundle.js"></script>
+
+	<!-- Stylesheets -->
+
+	<!-- My application's CSS -->
+	<link rel="stylesheet" href="css/main.css" />
 
 	<!-- Bootstrap CSS -->
 	<link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css" />
@@ -35,38 +43,6 @@
 	<!-- Font Awesome icons for spinners and the like -->
 	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
 
-	<script type="text/babel">
-
-		$(document).ready(function() {
-
-			var FixturesTable = window.FixturesTable;
-			var LeagueTable = window.LeagueTable;
-
-			$.ajax({
-				url: "/table",
-				success: function(data) {
-					var results = JSON.parse(data);
-					ReactDOM.render(
-						<LeagueTable teamsStats={ results } />,
-						document.getElementById('large-league-table')
-					);
-					$('[data-toggle="tooltip"]').tooltip();
-				}
-			});
-
-			$.ajax({
-				url: "/match",
-				success: function(data) {
-					var matches = JSON.parse(data);
-					ReactDOM.render(
-						<FixturesTable fixtures={ matches }/>,
-						document.getElementById('fixtures')
-					);					
-				}
-			});
-
-		});
-	</script>
 </head>
 <body>
 
@@ -200,6 +176,7 @@
 				<h1>Results & Fixtures</h1>
 
 				<div id="fixtures">
+					<!-- Fixture React component is mounted here -->
 				</div>
 				
 			</div>
@@ -209,6 +186,7 @@
 				<h1>Table</h1>
 
 				<div id="large-league-table">
+					<!-- LeagueTable React component is mounted here -->
 				</div>
 
 			</div>

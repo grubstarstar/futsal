@@ -20,6 +20,13 @@ module.exports = function (grunt) {
 				}
 			}
 		},
+		uglify: {
+			my_target: {
+				files: {
+					"./public/bundle.min.js": ["./public/bundle.js"]
+				}
+			}
+		},
 		watch: {
 			scripts: {
 				files: ["./src/**/*.js", "./src/**/*.jsx"],
@@ -29,8 +36,9 @@ module.exports = function (grunt) {
 	});
 
 	grunt.loadNpmTasks("grunt-browserify");
+	grunt.loadNpmTasks("grunt-contrib-uglify");
 	grunt.loadNpmTasks("grunt-contrib-watch");
 
-	grunt.registerTask("default", ["build", "watch"]);
-	grunt.registerTask("build", ["browserify"]);
+	grunt.registerTask("default", ["browserify", "watch"]);
+	grunt.registerTask("build", ["browserify", "uglify"]);
 };

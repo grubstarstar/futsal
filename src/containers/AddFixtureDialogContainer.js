@@ -12,7 +12,6 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
 	return {
 		onSave: (fixtureData, callback) => {
-			console.log('!!!!!!!!!!!calling onSave: fixtureData, callback', fixtureData, callback);
 			dispatch(saveNewFixture(fixtureData, callback))
 		}
 	};

@@ -102,12 +102,10 @@ const AddFixtureDialog = React.createClass({
 			fixtureData.kickOffAt = moment(new Date(fixtureData.kickOffAt)).toJSON();
 
 			// call the save function that was passed by the caller of this React component
-			console.log('about to call this.props.onSave passing in fixtureData: ', fixtureData);
 			this.props.onSave(
 				fixtureData,
 				(errorMessage) => {
 					// callback for the caller to call once it's saved
-					console.log("IN THE CALLBACK FOR HIDEING MODAL", errorMessage);
 					this.setState({
 						isSaving: false,
 						errorMessage: errorMessage,

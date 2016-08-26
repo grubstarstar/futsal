@@ -2,8 +2,8 @@ import React from 'react';
 import Fixtures from '../containers/FixturesContainer.js';
 import LeagueTable from '../containers/LeagueTableContainer.js';
 import AddFixtureDialog from '../containers/AddFixtureDialogContainer.js';
-import EditResultDialog from './EditResultDialog.jsx';
-import DeleteResultDialog from './DeleteResultDialog.jsx';
+import EditResultDialog from '../containers/EditResultDialogContainer.js';
+import DeleteResultDialog from '../containers/DeleteResultDialogContainer.js';
 
 const App = ({ matches, table }) => (
 

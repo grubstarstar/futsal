@@ -1,6 +1,10 @@
 import { connect } from 'react-redux';
 import Fixtures from '../components/Fixtures.jsx';
+
+// import the actions we need
 import populateFixtures from '../actions/Fixtures';
+import { changeEditResultDialogsFixture } from '../actions/EditResultDialog';
+import changeDeleteResultDialogsFixture from '../actions/DeleteResultDialog';
 
 const mapStateToProps = (state, ownProps) => {
 	return {
@@ -17,10 +21,12 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 		onClickRefresh: () => {
 			dispatch(populateFixtures());
 		},
-		onClickEdit: () => {
+		onClickEdit: (fixtureId) => {
+			dispatch(changeEditResultDialogsFixture(fixtureId));
 			$('#edit-result-dialog').modal('show');
 		},
-		onClickDelete: () => {
+		onClickDelete: (fixtureId) => {
+			dispatch(changeDeleteResultDialogsFixture(fixtureId));
 			$('#delete-result-dialog').modal('show');
 		},
 	};

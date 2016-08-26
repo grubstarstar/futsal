@@ -372,6 +372,8 @@ app.put('/match', function(req, res, next) {
 	var requiredFields = ['id', 'teamA_Goals', 'teamB_Goals'];
 	var allFields = requiredFields;
 
+	console.log(req.body);
+
 	var missingRequiredFields = [];
 	_(requiredFields)
 		.each(function(requiredField) {
@@ -396,8 +398,14 @@ app.put('/match', function(req, res, next) {
 		{ $set: _(data).pick('teamA_Goals', 'teamB_Goals') },
 		function(err, r) {
 			if(err) throw err;
-			res.end(JSON.stringify(r));
-			next();
+			db.collection('match').findOne({
+				_id: ObjectID.createFromHexString(data.id)
+			}, function(err, match) {
+				match.id = match._id;
+				delete match._id;
+				res.end(JSON.stringify(match));
+				next();
+			});
 		}
 	);
 });

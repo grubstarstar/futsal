@@ -30,7 +30,7 @@ let store = createStore(
 
 console.log('store.getState()', store.getState());
 
-let unsubscribe = store.subscribe(() => console.log('subscription handler', store.getState()));
+// let unsubscribe = store.subscribe(() => console.log('subscription handler', store.getState()));
 
 $(document).ready(function() {
 

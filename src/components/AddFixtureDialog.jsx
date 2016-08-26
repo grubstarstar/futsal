@@ -5,8 +5,14 @@ const AddFixtureDialog = React.createClass({
 
 	getInitialState() {
 		return {
-			isSaving: false  
+			isSaving: false,
+			errorMessage: null,
+			showSuccessMessage: false
 		};
+	},
+
+	componentDidMount() {
+	    $('#fixture-date').datetimepicker();  
 	},
 
 	render() {		
@@ -15,10 +21,20 @@ const AddFixtureDialog = React.createClass({
 			? <span><i className="fa fa-refresh fa-spin"></i> Saving...</span>
 			: 'Add fixture';
 
+		let errorComponent = this.state.errorMessage
+			? <div className="error-panel">{ this.state.errorMessage }</div>
+			: <div></div>
+
+		let successComponent = this.state.showSuccessMessage
+			? <div className="success-panel">Data saved successfully!</div>
+			: <div></div>
+
 		return (
 			<div id="add-fixture-dialog" className="modal fade" role="dialog">
 				<div className="modal-dialog">
 					<div className="modal-content">
+						{ errorComponent }
+						{ successComponent }
 						<div className="modal-header">
 							<h2>Add a new fixture</h2>
 						</div>
@@ -66,6 +82,7 @@ const AddFixtureDialog = React.createClass({
 		
 		let self = this;
 
+		// do stuff specific to this React component that isn't application specific
 		this.setState({
 
 			isSaving: true
@@ -75,34 +92,41 @@ const AddFixtureDialog = React.createClass({
 			let form = ReactDOM.findDOMNode(self.refs.theForm);
 
 			// get the form json into a key: value format
-			var data = {};
+			var fixtureData = {};
 			$(form).serializeArray().map(function(field) {
-				data[field.name] = field.value;
+				fixtureData[field.name] = field.value;
 			});
 
 			// convert kickOffAt to ISO8601 before it leaves the browser so we know timezone info.
 			// moment should do the right thing based on the browser settings.
-			data.kickOffAt = moment(new Date(data.kickOffAt)).toJSON();
+			fixtureData.kickOffAt = moment(new Date(fixtureData.kickOffAt)).toJSON();
 
-			// make the request and handle the response
-			$.ajax({
-				url: '/match',
-				method: 'POST',
-				contentType: 'application/json',
-				data: JSON.stringify(data),
-				success: function(data) {
-					this.modal("hide");
-				},
-				error: function(error) {
-					alert(error);
-					this.modal("hide");
-				},
-				complete: function() {
-					self.setState({
-						isSaving: false
+			// call the save function that was passed by the caller of this React component
+			console.log('about to call this.props.onSave passing in fixtureData: ', fixtureData);
+			this.props.onSave(
+				fixtureData,
+				(errorMessage) => {
+					// callback for the caller to call once it's saved
+					console.log("IN THE CALLBACK FOR HIDEING MODAL", errorMessage);
+					this.setState({
+						isSaving: false,
+						errorMessage: errorMessage,
+						showSuccessMessage: !errorMessage
 					});
+
+					if(errorMessage) {
+						setTimeout(() => {
+							$('#add-fixture-dialog').modal("hide");
+							this.setState({ errorMessage: null });
+						}, 2000);
+					} else {
+						setTimeout(() => {
+							$('#add-fixture-dialog').modal("hide");
+							this.setState({ showSuccessMessage: false });
+						}, 2000);
+					}
 				}
-			});
+			);
 
 		});
 

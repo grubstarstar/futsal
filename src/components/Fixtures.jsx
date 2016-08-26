@@ -106,8 +106,6 @@ var FixturesTable = React.createClass({
 				return moment(dtStr).unix();
 			})
 			.value();
-console.log('byDate',byDate);
-console.log('orderedDateHeaders',orderedDateHeaders);
 
 		// create the fixture rows with headers, in the correct order.
 		var i = 0;
@@ -134,13 +132,17 @@ console.log('orderedDateHeaders',orderedDateHeaders);
 			return fixtureRows;
 		});
 
+		// border styling based on if it's fetching data or not
+		var borderStyle = this.props.isFetching ? '5px red solid' : 'none';
+
 		// return the wrapping DOM element
 		return (
 			<div className="fixtures">
 				<div className="global-actions">
 					<button className="btn btn-sm btn-success" onClick={ this.props.onClickAdd }><span className="glyphicon glyphicon-plus-sign"></span> Add fixture</button>
+					<button className="btn btn-sm btn-success" onClick={ this.props.onClickRefresh } style={{ marginLeft: '0.5em' }}><span className="glyphicon glyphicon-refresh"></span> Refresh</button>
 				</div>
-				<table>
+				<table style={{ border: borderStyle }}>
 					<tbody>
 						{ rows }
 					</tbody>

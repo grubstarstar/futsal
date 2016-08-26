@@ -1,7 +1,7 @@
 import React from 'react';
 import Fixtures from '../containers/FixturesContainer.js';
 import LeagueTable from '../containers/LeagueTableContainer.js';
-import AddFixtureDialog from './AddFixtureDialog.jsx';
+import AddFixtureDialog from '../containers/AddFixtureDialogContainer.js';
 import EditResultDialog from './EditResultDialog.jsx';
 import DeleteResultDialog from './DeleteResultDialog.jsx';
 

@@ -28,6 +28,24 @@ div.fixtures table th {
 	padding: 0.6em 1em;
 }
 
+div#add-fixture-dialog .error-panel,
+div#edit-result-dialog .error-panel {
+	background: #FF1111;
+	margin: 0.5em;
+	border-radius: 0.5em;
+	color: white;
+	padding: 0.2em 1em;
+}
+
+div#add-fixture-dialog .success-panel,
+div#edit-result-dialog .success-panel {
+	background: #117711;
+	margin: 0.5em;
+	border-radius: 0.5em;
+	color: white;
+	padding: 0.2em 1em;
+}
+
 div.league-table table th {
 	border: solid white 0.2em;
 }

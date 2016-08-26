@@ -300,10 +300,12 @@ app.post('/match', function(req, res, next) {
 	data.teamB_Goals = data.teamB_Goals || 0;
 
 	
-	teamsFound = {
+	var teamsFound = {
 		teamA: null,
 		teamB: null
 	};
+
+	var teamIdToName = {};
 
 	function onGotTeam(AorB, id) {
 		teamsFound[AorB] = true;
@@ -311,7 +313,12 @@ app.post('/match', function(req, res, next) {
 		if(teamsFound.teamA && teamsFound.teamB) {
 			db.collection('match').insert(data, function(err, result) {
 				if (err) throw err;
-				res.end(JSON.stringify(result, null, "   "));
+				var newMatch = result.ops[0];
+				newMatch.id = newMatch._id;
+				newMatch.teamA = teamIdToName[newMatch.teamA];
+				newMatch.teamB = teamIdToName[newMatch.teamB];
+				delete newMatch._id;
+				res.end(JSON.stringify(newMatch, null, "   "));
 				next();
 			});	
 		}
@@ -322,11 +329,14 @@ app.post('/match', function(req, res, next) {
 		function(err, doc) {
 			if (err) throw err;
 			if(doc) {
+				teamIdToName[doc._id] = doc.name;
+				console.log(teamIdToName);
 				onGotTeam('teamA', doc._id);
 			} else {
 				db.collection('team').insert(
 					{ name: data.teamA },
 					function(err, r) {
+						teamIdToName[r.insertedIds[0]] = data.teamA;
 						onGotTeam('teamA', r.insertedIds[0]);
 					}
 				);
@@ -339,11 +349,14 @@ app.post('/match', function(req, res, next) {
 		function(err, doc) {
 			if (err) throw err;
 			if(doc) {
+				teamIdToName[doc._id] = doc.name;
+				console.log(teamIdToName);
 				onGotTeam('teamB', doc._id);
 			} else {
 				db.collection('team').insert(
 					{ name: data.teamB },
 					function(err, r) {
+						teamIdToName[r.insertedIds[0]] = data.teamB;
 						onGotTeam('teamB', r.insertedIds[0]);
 					}
 				);
@@ -358,6 +371,8 @@ app.put('/match', function(req, res, next) {
 	// validate fields
 	var requiredFields = ['id', 'teamA_Goals', 'teamB_Goals'];
 	var allFields = requiredFields;
+
+	console.log(req.body);
 
 	var missingRequiredFields = [];
 	_(requiredFields)
@@ -383,8 +398,14 @@ app.put('/match', function(req, res, next) {
 		{ $set: _(data).pick('teamA_Goals', 'teamB_Goals') },
 		function(err, r) {
 			if(err) throw err;
-			res.end(JSON.stringify(r));
-			next();
+			db.collection('match').findOne({
+				_id: ObjectID.createFromHexString(data.id)
+			}, function(err, match) {
+				match.id = match._id;
+				delete match._id;
+				res.end(JSON.stringify(match));
+				next();
+			});
 		}
 	);
 });

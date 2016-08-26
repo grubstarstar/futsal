@@ -1,32 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
+
 	<meta charset="UTF-8">
 	<title>Futsal</title>
-	<link rel="stylesheet" href="css/main.css" />
 
-	<!-- looks like we need this version for bootstrap datetimepicker... -->
+	<!-- JavaScript -->
+
+	<!-- JQuery: looks like we need this version for bootstrap datetimepicker... -->
 	<script src="https://code.jquery.com/jquery-2.2.4.js" integrity="sha256-iT6Q9iMJYuQiMWNd9lDyBUStIq/8PuOW33aOqmvFpqI=" crossorigin="anonymous"></script>
-
-	<script type="text/javascript" src="moment/min/moment.min.js"></script>
 
 	<script type="text/javascript" src="bootstrap/dist/js/bootstrap.min.js"></script>
 
+	<!-- Tether: Used for the Bootstrap tooltip plugin -->
 	<script type="text/javascript" src="/tether/dist/js/tether.js"></script>
 
+	<!-- Moment: Used in my application code and bootstrap-datetimepicker -->
+	<script type="text/javascript" src="moment/min/moment.min.js"></script>
+
+	<!-- Bootstrap datetimepicker: a date time field for forms -->
 	<script type="text/javascript" src="eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
 
-	<!-- React -->
-	<script src="https://npmcdn.com/react@15.3.0/dist/react.js"></script>
-	<script src="https://npmcdn.com/react-dom@15.3.0/dist/react-dom.js"></script>
-	<script src="https://npmcdn.com/babel-core@5.8.38/browser.min.js"></script>
-
-	<!-- Underscore -->
+	<!-- Underscore: I use this my application code -->
 	<script src="underscore/underscore.js" type="text/javascript"></script>
 
-	<!-- The react components -->
-	<script src="scripts/react/fixtures.jsx" type="text/babel"></script>
-	<script src="scripts/react/league-table.jsx" type="text/babel"></script>
+	<!-- My bundle: consists of app.js entry point and all imported application code, transpiled
+	using babelify allowing for ES6 and JSX. As well as the React & ReactDOM modules themselves -->
+	<script src="bundle.js"></script>
+
+	<!-- Stylesheets -->
+
+	<!-- My application's CSS -->
+	<link rel="stylesheet" href="css/main.css" />
 
 	<!-- Bootstrap CSS -->
 	<link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css" />
@@ -35,185 +40,10 @@
 	<!-- Font Awesome icons for spinners and the like -->
 	<link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
 
-	<script type="text/babel">
-
-		$(document).ready(function() {
-
-			var FixturesTable = window.FixturesTable;
-			var LeagueTable = window.LeagueTable;
-
-			$.ajax({
-				url: "/table",
-				success: function(data) {
-					var results = JSON.parse(data);
-					ReactDOM.render(
-						<LeagueTable teamsStats={ results } />,
-						document.getElementById('large-league-table')
-					);
-					$('[data-toggle="tooltip"]').tooltip();
-				}
-			});
-
-			$.ajax({
-				url: "/match",
-				success: function(data) {
-					var matches = JSON.parse(data);
-					ReactDOM.render(
-						<FixturesTable fixtures={ matches }/>,
-						document.getElementById('fixtures')
-					);					
-				}
-			});
-
-		});
-	</script>
 </head>
 <body>
 
-	<!-- Bootstrap form -->
-	<div class="container-fluid">
-		<div class="row">
-			<div class='col-sm-12'>
-
-				<div id="add-fixture-dialog" class="modal fade" role="dialog">
-					<div class="modal-dialog">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h2>Add a new fixture</h2>
-							</div>
-							<div class="modal-body">
-								<form id="new-fixture-form">
-									<div class="form-group">
-										<label for="team-a-name">Team A</label>
-										<input name="teamA" type="text" id="team-a-name" class="form-control" placeholder="Team A Name" />
-									</div>
-									<div class="form-group">
-										<label for="team-b-name">Team B</label>
-										<input name="teamB" type="text" id="team-b-name" class="form-control" placeholder="Team B Name" />
-									</div>
-									<div class="form-group">
-										<label for="fixture-date">Kick off @</label>
-										<div class='input-group' id='fixture-date'>
-											<input name="kickOffAt" type='text' class="form-control" />
-											<span class="input-group-addon">
-												<span class="glyphicon glyphicon-calendar"></span>
-											</span>
-										</div>
-									</div>
-									<div class="form-group">
-										<button type="submit" class="btn btn-default" data-loading-text='<i class="fa fa-refresh fa-spin"></i> Saving...'>Add fixture</button>
-									</div>
-								</form>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div id="edit-result-dialog" class="modal fade" role="dialog">
-					<div class="modal-dialog">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h2>Edit the result</h2>
-							</div>
-							<div class="modal-body">
-								<form id="edit-result-form">
-									<input type="hidden" name="id" />		
-									<div class="form-group">
-										<label for="team-a-score">Team A score</label>
-										<input name="teamA_Goals" type="text" id="team-a-score" class="form-control" placeholder="Team A Score" />
-									</div>
-									<div class="form-group">
-										<label for="team-b-score">Team B score</label>
-										<input name="teamB_Goals" type="text" id="team-b-score" class="form-control" placeholder="Team B Score" />
-									</div>
-									<div class="form-group">
-										<button type="submit" class="btn btn-default" data-loading-text='<i class="fa fa-refresh fa-spin"></i> Saving...'>Submit score</button>
-									</div>
-								</form>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div id="delete-result-dialog" class="modal fade" role="dialog">
-					<div class="modal-dialog">
-						<div class="modal-content">
-							<div class="modal-header">
-								<h2>Delete this fixture</h2>
-							</div>
-							<div class="modal-body">
-								<button id="delete-button" class="btn btn-danger" data-loading-text='<i class="fa fa-refresh fa-spin"></i> Deleting...'>Yes</button>
-								<button id="cancel-button" class="btn btn-default">No</button>
-							</div>
-						</div>
-					</div>
-				</div>
-
-			</div>
-			<script type="text/javascript">
-
-				$(function () {
-					$('#fixture-date').datetimepicker();
-				});
-
-				$('#new-fixture-form').on('submit', function(event) {
-					var $btn = $(this);
-
-					// change the button to display loading...
-					$btn.button('loading');
-
-					// get the form json into a key: value format
-					var data = {};
-					$(this).serializeArray().map(function(field) {
-						data[field.name] = field.value;
-					});
-
-					// convert kickOffAt to ISO8601 before it leaves the browser so we know timezone info.
-					// moment should do the right thing based on the browser settings.
-					data.kickOffAt = moment(new Date(data.kickOffAt)).toJSON();
-
-					$.ajax({
-						url: '/match',
-						method: 'POST',
-						contentType: 'application/json',
-						data: JSON.stringify(data),
-						success: function(data) {
-							$btn.button('reset');
-							$('#add-fixture-dialog').modal("hide");
-						},
-						error: function(error) {
-							alert(error);
-							$btn.button('reset');
-							$('#add-fixture-dialog').modal("hide");
-						}
-					});
-
-					event.preventDefault();
-				});
-
-			</script>
-		</div>
-
-		<div class="row">
-			<div class='col-sm-6'>
-
-				<h1>Results & Fixtures</h1>
-
-				<div id="fixtures">
-				</div>
-				
-			</div>
-
-			<div class='col-sm-6'>
-			
-				<h1>Table</h1>
-
-				<div id="large-league-table">
-				</div>
-
-			</div>
-		</div>
-
+	<div id="appRoot">
 	</div>
 
 </body>

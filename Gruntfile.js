@@ -16,7 +16,7 @@ module.exports = function (grunt) {
 			        }
 				},
 				files: {
-					"./public/bundle.js": ["./src/app.js"]
+					"./public/bundle.js": ["./src/index.js"]
 				}
 			}
 		},

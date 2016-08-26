@@ -137,9 +137,13 @@ var LeagueTableRow = React.createClass({
 var LeagueTable = React.createClass({
 	render: function() {
 		var i = 0;
+		var borderStyle = this.props.isFetching ? '5px red solid' : 'none';
 		return (
-			<div className="league-table" >
-				<table id="large-league-table">
+			<div className="league-table">
+				<div className="global-actions">
+					<button className="btn btn-sm btn-success" onClick={ this.props.onClickRefresh }><span className="glyphicon glyphicon-refresh"></span> Refresh</button>
+				</div>
+				<table id="large-league-table" style={{ border: borderStyle }}>
 					<thead>
 						<tr>
 							<th className="centred"><div>Position</div></th>
@@ -164,8 +168,6 @@ var LeagueTable = React.createClass({
 	},
 	getRows: function() {
 		function toggleChart() {
-			console.log('in toggleChart', this);
-			console.log(this.refs);
 		}
 		var i = 0;
 		var rows = this.props.teamsStats.map(function(teamStats) {

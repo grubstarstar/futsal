@@ -1,6 +1,6 @@
 import React from 'react';
-import Fixtures from './Fixtures.jsx';
-import LeagueTable from './LeagueTable.jsx';
+import Fixtures from '../containers/FixturesContainer.js';
+import LeagueTable from '../containers/LeagueTableContainer.js';
 import AddFixtureDialog from './AddFixtureDialog.jsx';
 import EditResultDialog from './EditResultDialog.jsx';
 import DeleteResultDialog from './DeleteResultDialog.jsx';
@@ -15,7 +15,7 @@ const App = ({ matches, table }) => (
 				<h1>Results &amp; Fixtures</h1>
 
 				<div id="fixtures">
-					<Fixtures fixtures={ matches }/>
+					<Fixtures/>
 				</div>
 				
 			</div>
@@ -25,7 +25,7 @@ const App = ({ matches, table }) => (
 				<h1>Table</h1>
 
 				<div id="large-league-table">
-					<LeagueTable teamsStats={ table } />
+					<LeagueTable/>
 				</div>
 
 			</div>

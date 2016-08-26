@@ -1,12 +1,13 @@
 # futsal
-Allows administrative tasks to keep track of upcoming fixtures and scores for Futsal league tables.
+Allows administrative tasks to keep track of upcoming fixtures and scores for Futsal/Soccer league tables.
 
 Built using
-* MongoDB
-* Node.js / Express.js
-* JQuery
-* React.js
 * Bootstrap 3
+* JQuery
+* React
+* Redux
+* Node.js / Express.js
+* MongoDB
 
 Provides an editable table of fixtures as a React component
 * Any games that have been played in the past (assuming a game length of 90 minutes) will have a score line and be styled as a result as opposed to a fixture.

@@ -30,64 +30,6 @@ var FixturesTableRow = React.createClass({
 	hasBeenPlayed: function() {
 		return moment() > moment(this.props.fixture.kickOffAt).add(90, 'minutes');
 	}
-	// putResult: function(event) {
-
-	// 	var btn = $(this.editResultForm).find('button');
-
-	// 	// change the button to display loading...
-	// 	btn.button('loading');
-
-	// 	// get the form json into a key: value format
-	// 	var data = {};
-	// 	$(this.editResultForm).serializeArray().map(function(field) {
-	// 		data[field.name] = field.value;
-	// 	});
-
-	// 	console.log("PUT JSON", data);
-	// 	console.log("PUT JSON", JSON.stringify(data));
-
-	// 	$.ajax({
-	// 		url: '/match',
-	// 		method: 'PUT',
-	// 		contentType: 'application/json',
-	// 		data: JSON.stringify(data),
-	// 		success: function(data) {
-	// 			btn.button('reset');
-	// 			this.editResultDialog.modal("hide");
-	// 		}.bind(this),
-	// 		error: function(error) {
-	// 			alert(error);
-	// 			btn.button('reset');
-	// 			this.editResultDialog.modal("hide");
-	// 		}.bind(this)
-	// 	});
-
-	// 	event.preventDefault();
-	// },
-	// onDelete: function() {
-	// 	this.confirmDeleteDialog.modal('show');
-	// },
-	// cancelDelete: function() {
-	// 	this.confirmDeleteDialog.modal('hide');
-	// },
-	// deleteResult: function(event) {
-
-		// var id = this.props.fixture.id;
-
-		// $.ajax({
-		// 	url: '/match/' + id,
-		// 	method: 'DELETE',
-		// 	success: function(data) {
-		// 		this.confirmDeleteDialog.modal("hide");
-		// 	}.bind(this),
-		// 	error: function(error) {
-		// 		alert(error);
-		// 		this.confirmDeleteDialog.modal("hide");
-		// 	}.bind(this)
-		// });
-
-		// event.preventDefault();
-	// }
 });
 
 var FixturesTable = React.createClass({

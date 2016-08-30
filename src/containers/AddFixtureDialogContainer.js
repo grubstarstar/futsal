@@ -4,8 +4,7 @@ import saveNewFixture from '../actions/AddFixtureDialog';
 
 const mapStateToProps = (state, ownProps) => {
 	return {
-	// 	isFetching: state.fixtures.isFetching,
-	// 	fixtures: state.fixtures.fixtures
+
 	};
 }
 

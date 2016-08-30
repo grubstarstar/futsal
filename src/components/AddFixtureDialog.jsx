@@ -116,12 +116,12 @@ const AddFixtureDialog = React.createClass({
 						setTimeout(() => {
 							$('#add-fixture-dialog').modal("hide");
 							this.setState({ errorMessage: null });
-						}, 2000);
+						}, 500);
 					} else {
 						setTimeout(() => {
 							$('#add-fixture-dialog').modal("hide");
 							this.setState({ showSuccessMessage: false });
-						}, 2000);
+						}, 500);
 					}
 				}
 			);

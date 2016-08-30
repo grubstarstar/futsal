@@ -93,12 +93,12 @@ const EditResultDialog = React.createClass({
 						setTimeout(() => {
 							$('#edit-result-dialog').modal("hide");
 							this.setState({ errorMessage: null });
-						}, 2000);
+						}, 500);
 					} else {
 						setTimeout(() => {
 							$('#edit-result-dialog').modal("hide");
 							this.setState({ showSuccessMessage: false });
-						}, 2000);
+						}, 500);
 					}
 				}
 			);

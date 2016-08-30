@@ -24,7 +24,7 @@ const App = ({ matches, table }) => (
 			
 				<h1>Table</h1>
 
-				<div id="large-league-table">
+				<div id="league-table">
 					<LeagueTable/>
 				</div>
 

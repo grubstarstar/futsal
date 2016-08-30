@@ -423,13 +423,24 @@ app.delete('/match/:id', function(req, res, next) {
 		return;
 	}
 
-	db.collection('match').removeOne(
-		{ _id: ObjectID.createFromHexString(req.params.id) },
-		function(err, r) {
-		if(err) throw err;
-		res.end(JSON.stringify(r));
-		next();
+	// get the match first so we're able to send back
+	// the document we're deleting in the response
+	db.collection('match').findOne({
+		_id: ObjectID.createFromHexString(req.params.id)
+	}, function(err, match) {
+		match.id = match._id;
+		delete match._id;
+		// now delete it from the db and send the response
+		db.collection('match').removeOne(
+			{ _id: ObjectID.createFromHexString(req.params.id) },
+			function(err, r) {
+				if(err) throw err;
+				res.end(JSON.stringify(match));
+				next();
+			}
+		);
 	});
+	
 });
 
 MongoClient.connect(url, function(err, dbHandle) {
@@ -438,8 +449,8 @@ MongoClient.connect(url, function(err, dbHandle) {
 	db = dbHandle;
 	console.log("Connected to MongoDB, starting HTTP server...");
 
-	app.listen(3000, function(req, res) {
-		console.log('...listening on 3000');
+	app.listen(8080, function(req, res) {
+		console.log('...listening on 8080');
 	});
 
 });

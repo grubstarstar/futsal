@@ -1,7 +1,7 @@
 import { REQUEST_FIXTURES, RECEIVE_FIXTURES } from '../actions/Fixtures';
 import { BEGIN_SAVE_NEW_FIXTURE, AFTER_SAVE_NEW_FIXTURE } from '../actions/AddFixtureDialog';
 import { CHANGE_EDIT_RESULT_DIALOGS_FIXTURE, BEGIN_SAVE_EDITED_RESULT, AFTER_SAVE_EDITED_RESULT } from '../actions/EditResultDialog';
-import { CHANGE_DELETE_RESULT_DIALOGS_FIXTURE } from '../actions/DeleteResultDialog';
+import { CHANGE_DELETE_DIALOGS_FIXTURE, BEGIN_DELETE_FIXTURE, AFTER_DELETE_FIXTURE } from '../actions/DeleteResultDialog';
 
 function fixtures(state = {
 	isFetching: false,
@@ -19,6 +19,8 @@ function fixtures(state = {
 			return Object.assign({}, state, { fixtures: saveNewFixture(state.fixtures, action) });
 		case AFTER_SAVE_EDITED_RESULT:
 			return Object.assign({}, state, { fixtures: saveEditedResultsFixture(state.fixtures, action) });
+		case AFTER_DELETE_FIXTURE:
+			return Object.assign({}, state, { fixtures: deleteFixture(state.fixtures, action) });
 		default:
 			return state;
 	}
@@ -72,6 +74,22 @@ function saveEditedResultsFixture(state = [], action) {
 	}
 }
 
+function deleteFixture(state = [], action) {
+	switch(action.type) {
+		case BEGIN_DELETE_FIXTURE:
+		case AFTER_DELETE_FIXTURE:
+			if(action.error) {
+				return state;
+			} else if(action.data) {
+				return _(state).filter((fixture) => fixture.id !== action.data.id);
+			} else {
+				throw new Error('The action payload for AFTER_DELETE_FIXTURE is invalid');
+			}
+		default:
+			return state;
+	}
+}
+
 export function fixtureRelatedDialogs(state = {
 	editResultDialogsFixture: null,
 	deleteResultDialogsFixture: null
@@ -79,7 +97,7 @@ export function fixtureRelatedDialogs(state = {
 	switch(action.type) {
 		case CHANGE_EDIT_RESULT_DIALOGS_FIXTURE:
 			return Object.assign({}, state, { editResultDialogsFixture: action.fixtureId });
-		case CHANGE_DELETE_RESULT_DIALOGS_FIXTURE:
+		case CHANGE_DELETE_DIALOGS_FIXTURE:
 			return Object.assign({}, state, { deleteResultDialogsFixture: action.fixtureId });
 		default:
 			return state;

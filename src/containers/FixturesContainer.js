@@ -4,7 +4,7 @@ import Fixtures from '../components/Fixtures.jsx';
 // import the actions we need
 import populateFixtures from '../actions/Fixtures';
 import { changeEditResultDialogsFixture } from '../actions/EditResultDialog';
-import changeDeleteResultDialogsFixture from '../actions/DeleteResultDialog';
+import { changeDeleteDialogsFixture } from '../actions/DeleteResultDialog';
 
 const mapStateToProps = (state, ownProps) => {
 	return {
@@ -26,7 +26,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
 			$('#edit-result-dialog').modal('show');
 		},
 		onClickDelete: (fixtureId) => {
-			dispatch(changeDeleteResultDialogsFixture(fixtureId));
+			dispatch(changeDeleteDialogsFixture(fixtureId));
 			$('#delete-result-dialog').modal('show');
 		},
 	};

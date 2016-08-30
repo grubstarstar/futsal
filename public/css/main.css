@@ -3,32 +3,50 @@ body {
 	"sans-serif";
 }
 
-div.league-table table,
+div#league-table table,
 div.fixtures table {
 	border-collapse: collapse;
 	background: #E6E6E6;
 }
 
-div.league-table,
+div#league-table,
 div.results,
 div.fixtures {
 	font-size: 0.8em;
 }
 
-div.league-table div.global-actions,
+div#league-table div.global-actions,
 div.results div.global-actions,
 div.fixtures div.global-actions {
 	margin-bottom: 1em;
 }
 
-div.league-table table td,
+div#league-table table td,
 div.fixtures table td,
 div.fixtures table th {
 	border: solid white 0.2em;
 	padding: 0.6em 1em;
 }
 
+div#league-table table {
+	position: relative;
+}
+div#league-table div.is-fetching-overlay {
+	height: inherit;
+	width: inherit;
+	background-color: rgba(255, 255, 255, 0.6);
+/* This is mostly intended for prototyping; please download the pattern and re-host for production environments. Thank you! */
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: -1;
+}
+div#league-table div.is-fetching-overlay.is-fetching {
+	z-index: 1;
+}
+
 div#add-fixture-dialog .error-panel,
+div#delete-result-dialog .error-panel,
 div#edit-result-dialog .error-panel {
 	background: #FF1111;
 	margin: 0.5em;
@@ -38,6 +56,7 @@ div#edit-result-dialog .error-panel {
 }
 
 div#add-fixture-dialog .success-panel,
+div#delete-result-dialog .success-panel,
 div#edit-result-dialog .success-panel {
 	background: #117711;
 	margin: 0.5em;
@@ -46,33 +65,33 @@ div#edit-result-dialog .success-panel {
 	padding: 0.2em 1em;
 }
 
-div.league-table table th {
+div#league-table table th {
 	border: solid white 0.2em;
 }
 
-div.league-table table th > div {
+div#league-table table th > div {
 	padding: 0.6em 1em;
 }
 
-div.league-table table th {
+div#league-table table th {
 	background: #191919;
 	color: #FFFFFF;
 	font-weight: normal;
 }
 
-div.league-table tr.chart {
+div#league-table tr.chart {
 	display: none;
 }
-div.league-table tr.chart td {
+div#league-table tr.chart td {
 	padding: 0;
 	background: rgba(255, 255, 0, 0.1);
 }
-div.league-table tr.chart td svg line.horizontal-grid {
+div#league-table tr.chart td svg line.horizontal-grid {
 	stroke: #CCC;
 	stroke-width: 1px;
 	// stroke-dasharray: 1,1
 }
-div.league-table tr.chart td svg line.vertical-grid {
+div#league-table tr.chart td svg line.vertical-grid {
 	stroke: #AAA;
 	stroke-width: 1px;
 	// stroke-dasharray: 1,1
@@ -105,7 +124,7 @@ div.fixtures table tr.has-been-played {
 
 /* keep the vert padding slim on cells that contain buttons */
 div.fixtures table td.control-cell,
-div.league-table table td.control-cell {
+div#league-table table td.control-cell {
 	padding: 0.4em 0.3em;
 }
 

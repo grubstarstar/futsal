@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import DeleteResultDialog from '../components/DeleteResultDialog.jsx';
-import saveResults from '../actions/DeleteResultDialog';
+import deleteFixture from '../actions/DeleteResultDialog';
 
 const mapStateToProps = (state, ownProps) => {
 	return {
@@ -11,7 +11,8 @@ const mapStateToProps = (state, ownProps) => {
 const mapDispatchToProps = (dispatch, ownProps) => {
 	return {
 		onSave: (fixtureData, callback) => {
-			dispatch(saveResults(fixtureData, callback))
+			console.log('onSave', fixtureData, callback);
+			dispatch(deleteFixture(fixtureData.id, callback))
 		}
 	};
 }

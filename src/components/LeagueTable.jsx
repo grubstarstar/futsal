@@ -135,15 +135,25 @@ var LeagueTableRow = React.createClass({
 });
 
 var LeagueTable = React.createClass({
+
+	componentDidMount() {
+		this.correctOverlayDimensions();
+	},
+
+	componentDidUpdate() {
+		this.correctOverlayDimensions();
+	},
+
 	render: function() {
-		var i = 0;
-		var borderStyle = this.props.isFetching ? '5px red solid' : 'none';
+		let i = 0;
+		// let isFetchingOverlay = this.props.isFetching ? <div className="is-fetching-overlay is-fetching"></div> : <div className="is-fetching-overlay"></div>;
+		let refreshButtonClasses = this.props.isFetching ? "btn btn-sm btn-success disabled" : "btn btn-sm btn-success";
 		return (
-			<div className="league-table">
+			<div>
 				<div className="global-actions">
-					<button className="btn btn-sm btn-success" onClick={ this.props.onClickRefresh }><span className="glyphicon glyphicon-refresh"></span> Refresh</button>
+					<button className={ refreshButtonClasses } onClick={ this.props.onClickRefresh }> <span className="glyphicon glyphicon-refresh"></span> Refresh</button>
 				</div>
-				<table id="large-league-table" style={{ border: borderStyle }}>
+				<table>
 					<thead>
 						<tr>
 							<th className="centred"><div>Position</div></th>
@@ -186,9 +196,25 @@ var LeagueTable = React.createClass({
 		}.bind(this))
 		return _.flatten(rows);
 	},
+
 	onStatButtonClick: function(relatedTeamStatRowIdx) {
 		var key = 'teamStat' + relatedTeamStatRowIdx;
 		this.refs[key].toggleShow();
+	},
+
+	correctOverlayDimensions: function() {
+		$(document).ready(function() {
+
+			let table = $('#league-table table');
+			console.log('table', table);
+			let height = table.height();
+			let width = table.width();
+			console.log('width, height', width, height);
+
+			let overlay = $('.is-fetching-overlay');
+			overlay.height(height);
+			overlay.width(width);
+		});
 	}
 });
 

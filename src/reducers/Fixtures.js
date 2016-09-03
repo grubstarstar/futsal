@@ -37,12 +37,11 @@ function fixturesPopulate(state = [], action) {
 
 function saveNewFixture(state = [], action) {
 	switch(action.type) {
-		case BEGIN_SAVE_NEW_FIXTURE:
 		case AFTER_SAVE_NEW_FIXTURE:
 			if(action.error) {
 				return state;
 			} else if(action.data) {
-				return [...state, action.data];				
+				return [...state, action.data];	
 			} else {
 				throw new Error('The action payload for AFTER_SAVE_NEW_FIXTURE is invalid');
 			}
@@ -53,7 +52,6 @@ function saveNewFixture(state = [], action) {
 
 function saveEditedResultsFixture(state = [], action) {
 	switch(action.type) {
-		case BEGIN_SAVE_EDITED_RESULT:
 		case AFTER_SAVE_EDITED_RESULT:
 			if(action.error) {
 				return state;
@@ -76,7 +74,6 @@ function saveEditedResultsFixture(state = [], action) {
 
 function deleteFixture(state = [], action) {
 	switch(action.type) {
-		case BEGIN_DELETE_FIXTURE:
 		case AFTER_DELETE_FIXTURE:
 			if(action.error) {
 				return state;

@@ -30,7 +30,7 @@ const AddFixtureDialog = React.createClass({
 			: <div></div>
 
 		return (
-			<div id="add-fixture-dialog" className="modal fade" role="dialog">
+			<div ref="theDialogBox" id="add-fixture-dialog" className="modal fade" role="dialog">
 				<div className="modal-dialog">
 					<div className="modal-content">
 						{ errorComponent }
@@ -71,11 +71,11 @@ const AddFixtureDialog = React.createClass({
 	},
 
 	show() {
-		ReactDOM.findDOMNode(self.refs.theDialogBox).modal("show");
+		$(ReactDOM.findDOMNode(this.refs.theDialogBox)).modal("show");
 	},
 
 	hide() {
-		ReactDOM.findDOMNode(self.refs.theDialogBox).modal("hide");
+		$(ReactDOM.findDOMNode(this.refs.theDialogBox)).modal("hide");
 	},
 
 	onSubmit(e) {
@@ -114,12 +114,12 @@ const AddFixtureDialog = React.createClass({
 
 					if(errorMessage) {
 						setTimeout(() => {
-							$('#add-fixture-dialog').modal("hide");
+							this.hide();
 							this.setState({ errorMessage: null });
 						}, 500);
 					} else {
 						setTimeout(() => {
-							$('#add-fixture-dialog').modal("hide");
+							this.hide();
 							this.setState({ showSuccessMessage: false });
 						}, 500);
 					}

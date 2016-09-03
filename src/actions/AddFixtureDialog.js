@@ -27,13 +27,11 @@ function saveNewFixture(fixtureData, next) {
 			success: function(response) {
 				dispatch(afterSaveNewFixture({ status: 'OK', data: JSON.parse(response) }));
 				next();
-				// $('#add-fixture-dialog').modal("hide"); // TODO: too tightly coupled to the fixture dialog box
 			},
 			error: function(xhr, status, error) {
 				console.log('THERE WAS AN ERROR', error);
 				dispatch(afterSaveNewFixture({ status: 'ERR', error: error }));
 				next(error);
-				// $('#add-fixture-dialog').modal("hide"); // TODO: too tightly coupled to the fixture dialog box
 			}
 		});
 	}

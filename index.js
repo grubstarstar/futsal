@@ -1,5 +1,14 @@
-var _ = require('underscore');
+"use strict"
+
+var _ = require('lodash');
 var moment = require('moment');
+
+var http = require('http');
+var https = require('https');
+var fs = require('fs');
+var crypto = require('crypto');
+
+var fetch = require('isomorphic-fetch')
 
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -15,8 +24,27 @@ app.use(express.static('public'));
 app.use(express.static('bower_components'));
 app.use(bodyParser.json());
 
+// trying our some of that curry stuff
+let respond = _.curry((status, json, next, res) => {
+	res.status(status).end(JSON.stringify(json))
+	next()
+})
+let forbiddenRespond = respond(401)
+let okRespond = respond(200)
+let internalServerError = respond(500)
 
+app.use((req, res, next) => {
+	console.log(`>> %s %s`, req.method, req.url)
+	if(req.body) {
+		console.log('   DATA', req.body)
+	}
+	next()
+})
+
+// the endpoints
 app.get('/table', function(req, res, next) {
+
+	console.log('in get /table')
 	
 	// the MongoDB collections
 	var match = db.collection('match');
@@ -210,6 +238,8 @@ app.get('/table', function(req, res, next) {
 
 app.get('/match', function(req, res, next) {
 	
+	console.log('in get /match')
+
 	var match = db.collection('match');
 
 	var matchStats = {};
@@ -262,42 +292,40 @@ app.get('/match', function(req, res, next) {
 app.post('/match', function(req, res, next) {
 
 	// validate fields
-	var requiredFields = ['teamA', 'teamB', 'kickOffAt'];
-	var optionalFields = ['teamA_Goals', 'teamB_Goals'];
-	var allFields = requiredFields.concat(optionalFields);
+	var requiredFields = ['teamA', 'teamB', 'kickOffAt']
+	var optionalFields = ['teamA_Goals', 'teamB_Goals']
+	var allFields = requiredFields.concat(optionalFields)
 
-	var missingRequiredFields = [];
-	_(requiredFields)
-		.each(function(requiredField) {
-			if(!req.body[requiredField]) missingRequiredFields.push(requiredField);
-		});
+	var missingRequiredFields = requiredFields
+		.filter((requiredField) => !req.body[requiredField])
 	if(missingRequiredFields.length) {
 		res
 			.status(400)
 			.json({
 				error: 'Missing required fields: ' + missingRequiredFields.join(', ')
 			});
-		res.end();
-		next();
-		return;
+		res.end()
+		next()
+		return
 	}
 
 	// get the data in the form that we want
-	var data = _(req.body).pick.apply(_(req.body), allFields);
-	data.kickOffAt = moment(new Date(data.kickOffAt));
+	var data = _(req.body).pick.apply(_(req.body), allFields)
+	data.kickOffAt = moment(new Date(data.kickOffAt))
 
 	if(!data.kickOffAt.isValid()) {
-		res.status(400).json({ error: 'Invalid kickOffAt datetime string' });
-		res.end();
-		next();
+		res.status(400).json({ error: 'Invalid kickOffAt datetime string' })
+		res.end()
+		next()
+		return
 	}
 
-	data.kickOffAt = data.kickOffAt.toJSON();
+	data.kickOffAt = data.kickOffAt.toJSON()
 
 	// just set to 0 - 0 is there are no goals given. The fixture may not have been played yet.
 	// also set FullTime to false, assuming it hasn't been played.
-	data.teamA_Goals = data.teamA_Goals || 0;
-	data.teamB_Goals = data.teamB_Goals || 0;
+	data.teamA_Goals = data.teamA_Goals || 0
+	data.teamB_Goals = data.teamB_Goals || 0
 
 	
 	var teamsFound = {
@@ -305,64 +333,38 @@ app.post('/match', function(req, res, next) {
 		teamB: null
 	};
 
-	var teamIdToName = {};
+	var teamIdToName = {}
 
-	function onGotTeam(AorB, id) {
-		teamsFound[AorB] = true;
-		data[AorB] = id;
-		if(teamsFound.teamA && teamsFound.teamB) {
-			db.collection('match').insert(data, function(err, result) {
-				if (err) throw err;
-				var newMatch = result.ops[0];
+	Promise.all(['teamA', 'teamB'].map((key) => {
+		return db.collection('team').findOne(
+			{ name: data[key] }
+		).then((doc) => {
+			return doc
+				? doc._id
+				: db.collection('team').insert(
+					{ name: data[key] }
+				).then((r) => r.insertedIds[0])
+		}).then((teamId) => {
+			console.log(`%s (%s) resolved to %s`, key, data[key], teamId)
+			teamIdToName[teamId] = data[key]
+			data[key] = teamId
+		})
+	}))
+	.then(() => {
+		db.collection('match').insert(data)
+			.then((r) => {
+				var newMatch = r.ops[0];
 				newMatch.id = newMatch._id;
 				newMatch.teamA = teamIdToName[newMatch.teamA];
-				newMatch.teamB = teamIdToName[newMatch.teamB];
+				newMatch.teamB = teamIdToName[newMatch.teamB]
 				delete newMatch._id;
-				res.end(JSON.stringify(newMatch, null, "   "));
-				next();
-			});	
-		}
-	}
-
-	db.collection('team').findOne(
-		{ name: data.teamA },
-		function(err, doc) {
-			if (err) throw err;
-			if(doc) {
-				teamIdToName[doc._id] = doc.name;
-				console.log(teamIdToName);
-				onGotTeam('teamA', doc._id);
-			} else {
-				db.collection('team').insert(
-					{ name: data.teamA },
-					function(err, r) {
-						teamIdToName[r.insertedIds[0]] = data.teamA;
-						onGotTeam('teamA', r.insertedIds[0]);
-					}
-				);
-			}
-		}
-	);
-
-	db.collection('team').findOne(
-		{ name: data.teamB },
-		function(err, doc) {
-			if (err) throw err;
-			if(doc) {
-				teamIdToName[doc._id] = doc.name;
-				console.log(teamIdToName);
-				onGotTeam('teamB', doc._id);
-			} else {
-				db.collection('team').insert(
-					{ name: data.teamB },
-					function(err, r) {
-						teamIdToName[r.insertedIds[0]] = data.teamB;
-						onGotTeam('teamB', r.insertedIds[0]);
-					}
-				);
-			}
-		}
-	);
+				res.end(JSON.stringify(newMatch, null, "   "))
+				next()
+				return
+			}).catch((error) => {
+				// ????
+			})
+	})
 
 });
 
@@ -443,14 +445,217 @@ app.delete('/match/:id', function(req, res, next) {
 	
 });
 
+app.post('/login', function(req, res, next) {
+
+	let profilePromise;
+
+	// facebook login
+	if(req.body.fb_access_token) {
+		profilePromise =
+			getFacebookProfile(req.body.fb_access_token)
+				.then((fbProfile) => {
+					// convert the fbProfile into one of ours that we store in the database
+					let profile = Object.assign({}, fbProfile, {
+						fb_access_token: req.body.fb_access_token
+					})
+					return _(profile).mapKeys((v, k) => ({ id: 'fb_user_id' })[k] || k).value()
+				})
+	}
+	// user credentials login
+	else if(req.body.email && req.body.password) {
+		profilePromise =
+			verifyCredsAndGetProfile(_.pick(req.body, 'email', 'password'))
+	}
+	// invalid request
+	else {
+		forbiddenRespond({ error: 'no access_token or credentials supplied' }, next, res)
+		return
+	}
+
+	profilePromise
+		.then(attachFutsalAccessToken)
+		.then(upsertProfile)
+		.then((profile) => profile.futsal_access_token)
+		.then((token) => {
+			okRespond({ futsal_access_token: token }, next, res)
+		})
+		.catch((error) => {
+			forbiddenRespond({ error: error.message }, next, res)
+		})
+
+});
+
+function getFacebookProfile(access_token) {
+	console.log('in getFacebookProfile')
+	return fetch("https://graph.facebook.com/me?fields=id,email,name&access_token=" + access_token)
+		.then((res) => res.json())
+		.then((json) => {
+			if(json.error) return Promise.reject(Error('Error from FB graph API: ' + json.error.message))
+			else return json
+		})
+}
+
+function verifyCredsAndGetProfile(creds) {
+	creds.password = crypto.createHmac('sha256', creds.password).digest('hex')
+	console.log('creds', creds)
+	console.log('_.assign({}, { is_active: true })', _.assign({}, { is_active: true }))
+	return db.collection('user').findOne(_.assign({}, { is_active: true }))
+		.then((doc) => {
+			if(!doc) return Promise.reject(Error('credentials do not match any users'))
+			else return doc
+		})
+}
+
+function upsertProfile(profile) {
+	console.log('in upsertProfile')
+	return db.collection('user').update(
+			{ email: profile.email },
+			{ $set: profile },
+			{ upsert: true }
+		)
+		.then((writeResult) => {
+			if(writeResult.result.writeConcernError) {
+				return Promise.reject(Error(writeResult.result.writeConcernError))
+			}
+			return profile
+		})
+}
+
+// let attachToObject = _.curry((objectToAttach, targetObject) => Object.assign(targetObject, objectToAttach))
+// let attachFutsalAccessToken = attachToObject({ futsal_access_token: crypto.randomBytes(32).toString('base64') })
+
+function attachFutsalAccessToken(profile) {
+	console.log('in attachFutsalAccessToken')
+	profile['futsal_access_token'] = crypto.randomBytes(32).toString('base64')
+	return profile
+}
+
+app.get('/profile', function(req, res, next) {
+
+	if(req.query.futsal_access_token) {
+		db.collection('user').findOne({
+			futsal_access_token: req.query.futsal_access_token
+		})
+			.then((profile) => {
+				if(!profile) throw Error('No matching users')
+				return profile
+			})
+			.then((profile) => {
+				okRespond({ profile }, next, res)
+			})
+			.catch((error) => {
+				forbiddenRespond({ error: error.message }, next, res)
+			})
+	} else {
+		forbiddenRespond({ error: 'Must contain a futsal_access_token' }, next, res)
+		return
+	}
+})
+
+app.post('/register', function(req, res, next) {
+
+	console.log(req.body)
+
+	// validate fields
+	var requiredFields = ['email', 'password']
+	// var optionalFields = ['name']
+	// var allFields = requiredFields.concat(optionalFields)
+	var allFields = requiredFields
+
+	var missingRequiredFields = requiredFields
+		.filter((requiredField) => !req.body[requiredField])
+	if(missingRequiredFields.length) {
+		respond(400, {
+			error: 'Missing required fields: ' + missingRequiredFields.join(', ')
+		}, next, res)
+		return
+	}
+
+	// get the data in the form that we want
+	var data = _(req.body).pick.apply(_(req.body), allFields).value()
+
+	// add and modify fields
+	data.password = crypto.createHmac('sha256', data.password).digest('hex')
+	data.activation_key = crypto.randomBytes(32).toString('base64')
+	data.is_active = false
+
+	db.collection('user').insertOne(data)
+		.then((result) => {
+			console.log('result.result.ok', result.result.ok)
+			if(result.result.ok) {
+				console.log(result.ops)
+				console.log(result.result.n)
+				okRespond(result.ops[0], next, res)
+			} else {
+				internalServerError({ error: 'Record insertion error' }, next, res)
+			}
+		})
+		.catch((error) => {
+			internalServerError({ error: error.message }, next, res)
+		})
+
+})
+
+app.post('/activate', function(req, res, next) {
+
+	console.log(req.body)
+
+	// validate fields
+	var requiredFields = ['activation_key']
+	// var optionalFields = ['name']
+	// var allFields = requiredFields.concat(optionalFields)
+	var allFields = requiredFields
+
+	var missingRequiredFields = requiredFields
+		.filter((requiredField) => !req.body[requiredField])
+	if(missingRequiredFields.length) {
+		respond(400, {
+			error: 'Missing required fields: ' + missingRequiredFields.join(', ')
+		}, next, res)
+		return
+	}
+
+	// get the data in the form that we want
+	var data = _(req.body).pick.apply(_(req.body), allFields).value()
+
+	db.collection('user').update(
+		data,
+		{ $set: { is_active: true }, $unset: { activation_key: 1 } }
+	)
+	.then((writeResult) => {
+		if(writeResult.result.writeConcernError) {
+			return Promise.reject(Error(writeResult.result.writeConcernError))
+		}
+		okRespond({ status: 'OK' }, next, res)
+	})
+	.catch((error) => {
+		internalServerError({ error: error.message }, next, res)
+	})
+})
+
 MongoClient.connect(url, function(err, dbHandle) {
 
 	assert.equal(null, err);
 	db = dbHandle;
 	console.log("Connected to MongoDB, starting HTTP server...");
 
-	app.listen(8080, function(req, res) {
-		console.log('...listening on 8080');
+	var HttpPort = 3080;
+	var HttpsPort = 3443;
+
+	// see available options here
+	//	https://nodejs.org/api/tls.html#tls_tls_createserver_options_secureconnectionlistener
+	const options = {
+		key: fs.readFileSync('ssl_keys/key.pem'),
+		cert: fs.readFileSync('ssl_keys/cert.pem'),
+		requestCert: false // this is the default anyway but let's be explicit
+	};
+
+	http.createServer( app).listen(HttpPort, function(req, res) {
+		console.log('...http listening on ', HttpPort);
+	});
+
+	https.createServer(options, app).listen(HttpsPort, function(req, res) {
+		console.log('...https listening on ', HttpsPort);
 	});
 
 });

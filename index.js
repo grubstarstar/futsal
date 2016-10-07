@@ -9,6 +9,8 @@ var fs = require('fs');
 var crypto = require('crypto');
 
 var fetch = require('isomorphic-fetch')
+var querystring = require('querystring')
+var handlebars = require('handlebars')
 
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -579,26 +581,53 @@ app.post('/register', function(req, res, next) {
 	data.activation_key = crypto.randomBytes(32).toString('base64')
 	data.is_active = false
 
-	db.collection('user').insertOne(data)
+	// insert the record into the database
+	let responseJson;
+	let dbPromise = db.collection('user').insertOne(data)
 		.then((result) => {
-			console.log('result.result.ok', result.result.ok)
-			if(result.result.ok) {
-				console.log(result.ops)
-				console.log(result.result.n)
-				okRespond(result.ops[0], next, res)
-			} else {
-				internalServerError({ error: 'Record insertion error' }, next, res)
-			}
+			if(result.result.ok) return result.ops[0]
+			else throw Error('Record insertion error')
 		})
-		.catch((error) => {
-			internalServerError({ error: error.message }, next, res)
-		})
-
+		// keep track of the json for the reponse
+		.then(json => responseJson = json)
+		.then(json => { console.log('responseJson > ', responseJson); return responseJson })
+		// attempt to send the email now we know the record is saved
+		.then(() => sendActivationEmail(
+			responseJson.email,
+			{
+				name: responseJson.name,
+				activation_key: querystring.escape(data.activation_key)
+			}))
+		// send response
+		.then(() => okRespond(responseJson, next, res))
+		.catch(error => internalServerError({ error: error.message }, next, res))
 })
 
-app.post('/activate', function(req, res, next) {
+const sendEmail = _.curry((from, subject, template, to, values) => {
+	return new Promise((resolve, reject) => {
+		console.log('values', values)
+		let text = handlebars.compile(template)(values)
+		console.log('email body', text)
 
-	console.log(req.body)
+		var api_key = 'key-d0846a9ba516e948473c6b769416b925';
+		var domain = 'mailgun.richgarner.net';
+		var mailgun = require('mailgun-js')({ apiKey: api_key, domain: domain });
+
+		mailgun.messages().send({from, to, subject, text}, function (error, body) {
+		  if(error) reject(Error(error))
+		  else resolve(body)
+		});
+	})
+})
+const sendAdminEmail = sendEmail('no-reply@jumpersforgoalposts.com')
+const sendActivationEmail = sendAdminEmail(
+	'"Jumpers for Goalposts" activation',
+	"Hi {{name}},\nPlease activate your account by clicking on this link:\nhttp://localhost:3080/activate?activation_key={{{activation_key}}}" /// triple '{' means handlebars won't escape the value! 
+)
+
+app.get('/activate', function(req, res, next) {
+
+	console.log(req.query)
 
 	// validate fields
 	var requiredFields = ['activation_key']
@@ -607,7 +636,7 @@ app.post('/activate', function(req, res, next) {
 	var allFields = requiredFields
 
 	var missingRequiredFields = requiredFields
-		.filter((requiredField) => !req.body[requiredField])
+		.filter((requiredField) => !req.query[requiredField])
 	if(missingRequiredFields.length) {
 		respond(400, {
 			error: 'Missing required fields: ' + missingRequiredFields.join(', ')
@@ -616,7 +645,7 @@ app.post('/activate', function(req, res, next) {
 	}
 
 	// get the data in the form that we want
-	var data = _(req.body).pick.apply(_(req.body), allFields).value()
+	var data = _(req.query).pick.apply(_(req.query), allFields).value()
 
 	db.collection('user').update(
 		data,

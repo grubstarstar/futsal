@@ -11,6 +11,7 @@ var crypto = require('crypto');
 var fetch = require('isomorphic-fetch')
 var querystring = require('querystring')
 var handlebars = require('handlebars')
+var mailgun = require('mailgun-js')({ apiKey: 'key-d0846a9ba516e948473c6b769416b925', domain: 'mailgun.richgarner.net' });
 
 var express = require('express');
 var bodyParser = require('body-parser');
@@ -605,14 +606,7 @@ app.post('/register', function(req, res, next) {
 
 const sendEmail = _.curry((from, subject, template, to, values) => {
 	return new Promise((resolve, reject) => {
-		console.log('values', values)
 		let text = handlebars.compile(template)(values)
-		console.log('email body', text)
-
-		var api_key = 'key-d0846a9ba516e948473c6b769416b925';
-		var domain = 'mailgun.richgarner.net';
-		var mailgun = require('mailgun-js')({ apiKey: api_key, domain: domain });
-
 		mailgun.messages().send({from, to, subject, text}, function (error, body) {
 		  if(error) reject(Error(error))
 		  else resolve(body)
